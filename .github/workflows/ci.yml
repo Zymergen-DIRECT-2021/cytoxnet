@@ -43,8 +43,7 @@ jobs:
       run: |
         coverage report
     - name: Coveralls
-      uses: coverallsapp/github-action@master
+      uses: codecov/codecov-action@v1
       with:
-        base-path: cytoxnet
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        fail_ci_if_error: true
 

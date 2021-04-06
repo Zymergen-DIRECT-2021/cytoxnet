@@ -28,7 +28,7 @@ jobs:
     - name: Install testing dependencies
       run: |
         conda install --yes flake8 pytest coverage
-        pip install flake8-docstrings
+        pip install flake8-docstrings coveralls
     - name: Lint with flake8
       run: |
         conda install flake8
@@ -42,3 +42,8 @@ jobs:
     - name: Generate coverage report
       run: |
         coverage report
+    - name: Coveralls
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
+

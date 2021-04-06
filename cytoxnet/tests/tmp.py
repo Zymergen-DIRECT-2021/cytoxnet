@@ -1,4 +1,4 @@
-"""Temporary test to not break pytest until we start writing.""""
+"""Temporary test to not break pytest until we start writing."""
 import pytest
 
 def test_dummy():

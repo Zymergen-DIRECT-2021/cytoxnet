@@ -40,6 +40,7 @@ jobs:
       run: |
         coverage run --omit="cytoxnet/tests/*" -m pytest
     - name: Generate coverage report
+      env: GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         coverage report
         coveralls

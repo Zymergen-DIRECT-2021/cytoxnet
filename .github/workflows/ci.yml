@@ -45,6 +45,6 @@ jobs:
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
-        basepath: cytoxnet
+        base-path: cytoxnet
         github-token: ${{ secrets.GITHUB_TOKEN }}
 

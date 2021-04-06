@@ -1,3 +1,7 @@
 name: cytoxnet
+channels:
+  - conda-forge
+  - defaults
 dependencies:
   - numpy
+

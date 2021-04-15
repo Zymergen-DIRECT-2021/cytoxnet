@@ -43,7 +43,7 @@ sklearn.gaussian_process._gpr.GaussianProcessRegressor
 """
 # deepchem sklearn model wrapper might be helpful
 
-import importlib
+# import importlib
 
 # a codex containing the available models and their information to grab
 # dict of `name`: (`short_descr`, `class_string`)
@@ -58,19 +58,20 @@ _models = {
     )
 }
 
+
 class ToxModel:
     """Highlevel access to available model classes.
-    
+
     Class instantialization will retrieve the requested model type. The help
     method provides quick access to model docs.
-    
+
     Parameters
     ----------
         model_name : str
             The name of the model type to instatialize.
         kwargs
             Keyword arguments to pass to the model type for initialization.
-    
+
     Returns
     -------
         Instance of requested class.
@@ -115,7 +116,7 @@ class ToxModel:
 
     models = _models
     """dict: Codex of available models.
-    
+
     Dictionary of `model_name`: (`model_class`, `short_description`). Models
     are imported and instantialized from this dictionary. The short
     description is used for the help method to give some information.
@@ -134,11 +135,12 @@ class ToxModel:
         #       be used eg classification
         # >instantialize model type with keyword
         # >return instance
+        model = None
         return model
-    
+
     def _check_model_avail(self, model_name: str):
         """Check if model name is one of the available models.
-        
+
         Parameters
         ----------
             model_name : str
@@ -154,7 +156,7 @@ class ToxModel:
 
     def _import_model_type(self, model_type: str):
         """Import model type class from model type module.
-        
+
         Parameters
         ----------
             model_type : str
@@ -167,11 +169,11 @@ class ToxModel:
 
     def help(self, model_name: str = None):
         """Get list of available model classes, or help on specific one.
-        
+
         If no models are specified, prints the list of available models
         with a short description. If an available model name is specified,
         prints the docs for that model class.
-        
+
         Parameters
         ----------
             model_name : str, default None

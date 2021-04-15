@@ -43,7 +43,13 @@ sklearn.gaussian_process._gpr.GaussianProcessRegressor
 """
 # deepchem sklearn model wrapper might be helpful
 
-# import importlib
+from typing import Type, Union
+
+import deepchem
+
+# typing
+Model = Type[deepchem.model]
+Dataset = Type[deepchem.dataset]
 
 # a codex containing the available models and their information to grab
 # dict of `name`: (`short_descr`, `class_string`)
@@ -183,3 +189,69 @@ class ToxModel:
         # >if model name is none, print names and short descrs
         # >otherwise print docs for the requested model name
         return
+
+
+def transfer(model: Model,
+             dataset: Dataset,
+             **kwargs):
+    """Transfer a model unto a new task.
+
+    Already learned inner layers of a model are fixed to preserve the learned
+    relationship, and outer/pooling layers are appended and trainable. The
+    model is then retrained on the new task.
+
+    Parameters
+    ----------
+        model : :obj:deepchem.model
+            The model to conduct transfer learning on.
+        dataset : :obj:deepchem.dataset
+            The dataset represening the task to transfer onto.
+
+    Returns
+    -------
+        new_model : :obj:deepchem.model
+            The transfered model.
+    """
+    # pseudo code
+    # >check inputs
+    # >cut model ties to disk - don't want to overwrite the old model
+    # >append/replace output layers? this will be tough and is unclear how to
+    #   do this uniformly across model types. Potentially probing of output
+    #   layers for types
+    # >fix old layers
+    # >call fit on new data
+    new_model = None
+    return new_model
+
+
+def pretrain(model: Model,
+             dataset: Union[Dataset, str],
+             **kwargs):
+    """Train a model and prepare it to recieve a new task.
+
+    Trains a model on a large/known dataset, then prepares the model to be
+    transfered onto a new dataset by fixing inner layers and replacing or
+    appending outer layers.
+
+    Parameters
+    ----------
+        model : :obj:deepchem.model
+            The model to pretrain.
+        dataset : :obj:deepchem.dataset or str
+            The dataset represening the task to transfer onto, or the string
+                name of one in the package to use.
+
+    Returns
+    -------
+        model : :obj:deepchem.model
+            The pretrained model.
+    """
+    # pseudo code
+    # >check inputs
+    # >call fit on pretraining data
+    # >append/replace output layers? this will be tough and is unclear how to
+    #   do this uniformly across model types. Potentially probing of output
+    #   layers for types
+    # >fix old layers
+    model = None
+    return model

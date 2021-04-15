@@ -138,7 +138,7 @@ class ToxModel:
         model = None
         return model
 
-    def _check_model_avail(self, model_name: str):
+    def _check_model_avail(model_name: str):
         """Check if model name is one of the available models.
 
         Parameters
@@ -146,10 +146,10 @@ class ToxModel:
             model_name : str
                 The name of the model type to check.
         """
-        if model_name not in self.models.keys():
+        if model_name not in ToxModel.models.keys():
             raise AttributeError(
                 "The requested model '{}' is not an available model. Current\
- available models: {}".format(model_name, list(self.models.keys()))
+ available models: {}".format(model_name, list(ToxModel.models.keys()))
             )
         else:
             return
@@ -167,7 +167,7 @@ class ToxModel:
         # maybe string.split('.') will do it
         return
 
-    def help(self, model_name: str = None):
+    def help(model_name: str = None):
         """Get list of available model classes, or help on specific one.
 
         If no models are specified, prints the list of available models
@@ -183,3 +183,5 @@ class ToxModel:
         # >if model name is none, print names and short descrs
         # >otherwise print docs for the requested model name
         return
+
+def 

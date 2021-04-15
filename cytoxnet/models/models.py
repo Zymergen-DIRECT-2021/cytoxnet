@@ -183,5 +183,3 @@ class ToxModel:
         # >if model name is none, print names and short descrs
         # >otherwise print docs for the requested model name
         return
-
-def 

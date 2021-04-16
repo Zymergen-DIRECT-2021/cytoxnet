@@ -21,6 +21,7 @@ def load_data(datafile, columns='all'):
 
     """
     # assert file exists and contains data
+    # remove/ignore unwanted columns
     # run any more checks specific to the data that we may want to add
     # support for multiple file types?
     # load a csv file into a dataframe

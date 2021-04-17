@@ -7,4 +7,5 @@ dependencies:
   - deepchem
   - rdkit
   - scikit-learn
+  - altair
 

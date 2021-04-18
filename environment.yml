@@ -8,4 +8,5 @@ dependencies:
   - rdkit
   - scikit-learn
   - altair
-
+  - requests
+  - matplotlib

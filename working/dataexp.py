@@ -259,3 +259,10 @@ def analyze(dataframe, smiles_col, target_col, mol_col='Mol', classify=False):
     ).properties(width=400, height=100)
     
     return chart1, chart2, chart3, chart4, chart5, chart6
+
+def pipeline(dataframe, smiles_col, target_col, classify=True):
+    dataframe = smiles_to_mol(dataframe, smiles_col)
+    dataframe = add_circular_fingerprint(dataframe)
+    dataframe = preprocess(dataframe, drop_cols=[smiles_col, target_col])
+    charts = analyze(dataframe, smiles_col, target_col, mol_col='Mol', classify=classify)
+    return charts

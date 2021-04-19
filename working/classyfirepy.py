@@ -464,8 +464,8 @@ def expand_ClassyFied_df(df_in, label = 'ClassyFire_output'):
     
     ## expand dictionary of dictionaries from direct output
     expanded_column = df_out[label].apply(pd.Series)
-#     print(expanded_column)
-#     expanded_column.drop(0, axis = 1, inplace=True)
+    print(expanded_column)
+    expanded_column.drop(0, axis = 1, inplace=True)
 
     ## total discription captures all sub description, drop these for kingdom, class etc. for useful columns
     def get_class(row):

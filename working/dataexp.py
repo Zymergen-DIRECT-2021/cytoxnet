@@ -13,6 +13,7 @@ import classyfirepy as cp
 from matplotlib import cm
 import seaborn as sns
 
+altair.data_transformers.disable_max_rows()
 
 def load_data(csv_file: str, id_col: str):
     # need to change file path to where the data is on your local for now
@@ -258,11 +259,18 @@ def analyze(dataframe, smiles_col, target_col, mol_col='Mol', classify=False):
         altair.Color('Measurement_type:N')
     ).properties(width=400, height=100)
     
-    return chart1, chart2, chart3, chart4, chart5, chart6
+    chart7 = altair.Chart(pc_dataframe).mark_rect().encode(
+        altair.X('PC1:Q', bin=altair.Bin(maxbins=50)),
+        altair.Y('PC2:Q', bin=altair.Bin(maxbins=50)),
+        altair.Color('count(PC1):Q', scale=altair.Scale(scheme='greenblue'))
+    )
+    
+    return dataframe, chart1, chart2, chart3, chart4, chart5, chart6, chart7
 
 def pipeline(dataframe, smiles_col, target_col, classify=True):
     dataframe = smiles_to_mol(dataframe, smiles_col)
     dataframe = add_circular_fingerprint(dataframe)
     dataframe = preprocess(dataframe, drop_cols=[smiles_col, target_col])
-    charts = analyze(dataframe, smiles_col, target_col, mol_col='Mol', classify=classify)
-    return charts
+    out = analyze(dataframe, smiles_col, target_col, mol_col='Mol', classify=classify)
+    dataframe = out[0]; charts = out[1:]
+    return dataframe, charts

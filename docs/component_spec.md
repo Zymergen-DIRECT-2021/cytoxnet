@@ -28,17 +28,17 @@ for transfer learning.
 load_file(datafile: str,
           cols: str or list of str = None) -> pandas DataFrame
 ```
-- _Use Case_: (1)
-- _Inputs_: File location string, columns to keep
-- _Outputs_: Dataframe of dataset on file
+- __Use Case__: (1)
+- __Inputs__: File location string, columns to keep
+- __Outputs__: Dataframe of dataset on file
 
 ```
 load_XXX(prepare: bool = False)
 ```
-- _Use Case_: (1)
-- _Inputs_: Whether or not to featurize and prepare set using a default
+- __Use Case__: (1)
+- __Inputs__: Whether or not to featurize and prepare set using a default
   pipeline
-- _Outputs_: Dataframe of package dataset
+- __Outputs__: Dataframe of package dataset
 
 ### `cytoxnet/dataprep/featurize.py`
 
@@ -48,9 +48,9 @@ clean_dataframe(dataframe,
                 duplicates: str = 'drop',
                 nans: str = 'drop') -> pandas DataFrame
 ```
-- _Use Case_: (1, 2)
-- _Inputs_: Dataframe, columns to clean, how to handle nans and duplicates.
-- _Outputs_: Dataframe
+- __Use Case__: (1, 2)
+- __Inputs__: Dataframe, columns to clean, how to handle nans and duplicates.
+- __Outputs__: Dataframe
 
 ```
 featurize(dataframe,
@@ -59,10 +59,10 @@ featurize(dataframe,
           featurizer: str = 'CircularFingerprint',
           descriptor_cols: list of str = None) -> dataframe
 ```
-- _Use Case_: (2)
-- _Inputs_: Dataframe, columns containing targets and features, type of
+- __Use Case__: (2)
+- __Inputs__: Dataframe, columns containing targets and features, type of
   featurizer to use, additional descriptors to keep as features.
-- _Outputs_: Dataframe with X and y columns
+- __Outputs__: Dataframe with X and y columns
 - *Temporary note*: call convert to catagorical on descriptor cols and target
 
 ### `cytoxnet/dataprep/dataprep.py`
@@ -71,9 +71,9 @@ featurize(dataframe,
 convert_to_catagorical(dataframe,
                        cols: list of str)
 ```
-- _Use Case_: (3)
-- _Inputs_: Dataframe, columns to consider for catagorical conversion
-- _Outputs_: Dataframe with considered columns that are non numeric converted.
+- __Use Case__: (3)
+- __Inputs__: Dataframe, columns to consider for catagorical conversion
+- __Outputs__: Dataframe with considered columns that are non numeric converted.
 
 ```
 convert_to_dataset(dataframe,
@@ -81,18 +81,18 @@ convert_to_dataset(dataframe,
                    y_col: str = 'y',
                    w_col: str = None)
 ```
-- _Use Case_: (3)
-- _Inputs_: Dataframe, non default X and y columns
-- _Outputs_: deepchem dataset from dataframe
+- __Use Case__: (3)
+- __Inputs__: Dataframe, non default X and y columns
+- __Outputs__: deepchem dataset from dataframe
 
 ```
 preprocess(dataset,
            transformations: list of str = ['NormTransform',],
            splitter: str = 'RandomSplitter')
 ```
-- _Use Case_: (3)
-- _Inputs_: Dataset and transformations to make.
-- _Outputs_: Dataset(s) preprocessed and ready for ml
+- __Use Case__: (3)
+- __Inputs__: Dataset and transformations to make.
+- __Outputs__: Dataset(s) preprocessed and ready for ml
 
 ```
 pipeline(datafile: str,
@@ -101,18 +101,18 @@ pipeline(datafile: str,
          target_cols: list of str,
          **kwargs)
 ```
-- _Use Case_: (1,2,3)
-- _Inputs_: Datafile location, columns in question, keywords for pipeline.
-- _Outputs_: Dataset(s) preprocessed and ready for ml.
+- __Use Case__: (1,2,3)
+- __Inputs__: Datafile location, columns in question, keywords for pipeline.
+- __Outputs__: Dataset(s) preprocessed and ready for ml.
 
 ### `cytoxnet/dataprep/analyze.py`
 
 ```
 dataset_transferability(dataset1, dataset2)
 ```
-- _Use Case_: (9)
-- _Inputs_: Datasets to compared.
-- _Outputs_: Metrics and visuals of the transferability of dataset 1 to 2.
+- __Use Case__: (9)
+- __Inputs__: Datasets to compared.
+- __Outputs__: Metrics and visuals of the transferability of dataset 1 to 2.
 
 ## `cytoxnet/models/`
 
@@ -121,34 +121,34 @@ dataset_transferability(dataset1, dataset2)
 ```
 ToxModel.help(model_name: str)
 ```
-- _Use Case_: (4.1)
-- _Inputs_: Model name, model method or None
-- _Outputs_: Printout of help on model, model method, or available models.
+- __Use Case__: (4.1)
+- __Inputs__: Model name, model method or None
+- __Outputs__: Printout of help on model, model method, or available models.
 
 
 ```
 ToxModel(model_name: str, *kwargs)
 ```
-- _Use Case_: (4.2)
-- _Inputs_: Model name, keyword arguments for that model.
-- _Outputs_: Instance of ToxModel with model type.
+- __Use Case__: (4.2)
+- __Inputs__: Model name, keyword arguments for that model.
+- __Outputs__: Instance of ToxModel with model type.
 
 Use cases 4.3+ and 6 are handled by model instance. See `deepchem.models.Model`.
 
 ```
 ToxModel.pretrain(dataset, fix: bool: False)
 ```
-- _Use Case_: (7)
-- _Inputs_: dataset to pretrain on
-- _Outputs_: Trained model with output ready for new target and potentially
+- __Use Case__: (7)
+- __Inputs__: dataset to pretrain on
+- __Outputs__: Trained model with output ready for new target and potentially
   fixed layers
   
 ```
 ToxModel.transfer(dataset, fix: bool: False)
 ```
-- _Use Case_: (7)
-- _Inputs_: dataset to transfer to
-- _Outputs_: Trained model on new targets, with layers potentially fixed to
+- __Use Case__: (7)
+- __Inputs__: dataset to transfer to
+- __Outputs__: Trained model on new targets, with layers potentially fixed to
   previous training.
   
 ### `cytoxnet/models/opt.py`
@@ -159,15 +159,15 @@ HypOpt(model_name: str,
        searchable_params: dict,
        fixed_params: dict)
 ```
-- _Use Case_: (5)
-- _Inputs_: Model class type, hyperparameter search scheme and space
-- _Outputs_: Optimized model and best parameters
+- __Use Case__: (5)
+- __Inputs__: Model class type, hyperparameter search scheme and space
+- __Outputs__: Optimized model and best parameters
   
 ### `cytoxnet/models/analyze.py`
 
 ```
 ModelAnalysis(tox_model, dataset)
 ```
-- _Use Case_: (8)
-- _Inputs_: Test dataset and a trained model
-- _Outputs_: Metrics and visuals of model performance.
+- __Use Case__: (8)
+- __Inputs__: Test dataset and a trained model
+- __Outputs__: Metrics and visuals of model performance.

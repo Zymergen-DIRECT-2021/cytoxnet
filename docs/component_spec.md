@@ -5,6 +5,7 @@ for transfer learning.
 ***
 ***
 ## package format
+```
 /cytoxnet
 |-/dataprep
 | |-io.py
@@ -16,6 +17,7 @@ for transfer learning.
 | |-opt.py
 | |-analyze.py
 |-/tests
+```
 ***
 
 ## `cytoxnet/dataprep/`

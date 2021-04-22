@@ -89,7 +89,7 @@ convert_to_dataset(dataframe,
 ```
 preprocess(dataset,
            transformations: list of str = ['NormTransform',],
-           splitter: str = 'RandomSplitter')
+           splitter: str = 'RandomSplitter', **kwargs)
 ```
 - __Use Case__: (3)
 - __Inputs__: Dataset and transformations to make.

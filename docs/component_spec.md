@@ -79,7 +79,8 @@ convert_to_catagorical(dataframe,
 convert_to_dataset(dataframe,
                    X_col: str = 'X',
                    y_col: str = 'y',
-                   w_col: str = None)
+                   w_col: str = None,
+                   id_col: str = None)
 ```
 - __Use Case__: (3)
 - __Inputs__: Dataframe, non default X and y columns

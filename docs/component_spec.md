@@ -112,7 +112,7 @@ pipeline(datafile: str,
 dataset_transferability(dataset1, dataset2)
 ```
 - __Use Case__: (9)
-- __Inputs__: Datasets to compared.
+- __Inputs__: Datasets to be compared.
 - __Outputs__: Metrics and visuals of the transferability of dataset 1 to 2.
 
 ## `cytoxnet/models/`

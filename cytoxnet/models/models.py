@@ -38,7 +38,7 @@ Gaussian process regression (GPR).
     ----------
 ...
 >>>mymodel = ToxModel('GPR')
->>>type(mymodel)
+>>>type(mymodel.model)
 sklearn.gaussian_process._gpr.GaussianProcessRegressor
 """
 # deepchem sklearn model wrapper might be helpful
@@ -46,6 +46,8 @@ sklearn.gaussian_process._gpr.GaussianProcessRegressor
 from typing import Type, Union
 
 import deepchem
+import sklearn
+import tensorflow.keras
 
 # typing
 Model = Type[deepchem.model]
@@ -116,7 +118,7 @@ class ToxModel:
         ----------
     ...
     >>>mymodel = ToxModel('GPR')
-    >>>type(mymodel)
+    >>>type(mymodel.model)
     sklearn.gaussian_process._gpr.GaussianProcessRegressor
     """
 
@@ -128,7 +130,7 @@ class ToxModel:
     description is used for the help method to give some information.
     """
 
-    def __new__(self,
+    def __init__(self,
                 model_name: str,
                 **kwargs):
         # pseudocode
@@ -141,10 +143,37 @@ class ToxModel:
         #       be used eg classification
         # >instantialize model type with keyword
         # >return instance
-        model = None
-        return model
 
-    def _check_model_avail(model_name: str):
+        # checking and retrieving model class
+        if type(model_name) != str:
+            raise TypeError(
+                'Model name should be type str, not {}'.format(
+                    type(model_name)
+                )
+            )
+        else:
+            pass
+        self._check_model_avail(model_name)
+        ModelClass = self._import_model_type(self.models[model_name][1])
+        # initialize the model
+        model = ModelClass(**kwargs)
+
+        # if the model is already deepchem, check and handle if classify or
+        # regress was chosen
+        if isinstance(model, deepchem.models.Model):
+            if hasattr(model, 'mode') and 'mode' not in kwargs.keys():
+                print(
+                    'WARNING: `mode` not passed so using the default\
+for the task: {}'.format(model.mode)
+                )
+            self.model = model
+        # if the model was sklearn, wrap
+        elif isinstance(model, sklearn.BaseEstimator):
+            self.model = deepchem.models.SklearnModel(model)
+            
+        return 
+
+    def _check_model_avail(self, model_name: str):
         """Check if model name is one of the available models.
 
         Parameters
@@ -152,10 +181,10 @@ class ToxModel:
             model_name : str
                 The name of the model type to check.
         """
-        if model_name not in ToxModel.models.keys():
+        if model_name not in self.models.keys():
             raise AttributeError(
                 "The requested model '{}' is not an available model. Current\
- available models: {}".format(model_name, list(ToxModel.models.keys()))
+ available models: {}".format(model_name, list(self.models.keys()))
             )
         else:
             return
@@ -167,11 +196,29 @@ class ToxModel:
         ----------
             model_type : str
                 String of model class import path.
+
+        Returns
+        ----------
+            model_class : object
+                The requested model class.
         """
         # pseudocode
         # >importlib all module in package with `list`
         # maybe string.split('.') will do it
-        return
+        # get package and subpackage names
+        components = model_type.split('.')
+        # import package
+        mod = __import__(components[0])
+        # import subpackages
+        for i, comp in enumerate(components[1:]):
+            if not hasattr(mod, comp):
+                raise AttributeError(
+                    'The module {} does not contain the attribute {}'.format(
+                        components[:i], comp
+                    )
+                )
+            mod = getattr(mod, comp)
+        return mod
 
     def help(model_name: str = None):
         """Get list of available model classes, or help on specific one.
@@ -188,6 +235,28 @@ class ToxModel:
         # pseudocode
         # >if model name is none, print names and short descrs
         # >otherwise print docs for the requested model name
+        # the user wants general help on available models
+        if model_name == None:
+            print('=================')
+            print('AVAILABLE MODELS:')
+            print('=================')
+            for name, (desc, mod) in self.models.items():
+                print(name+': ', desc)
+        # the user wants help on a specific model type
+        elif type(model_name) == str:
+            avail_models = list(self.models.keys())
+            if model_name not in avail_models:
+                raise AttributeError(
+                    '{} not an available model from: {}'.format(
+                        model_name, avail_models
+                    )
+                )
+            else:
+                pass
+            # need to import the class first
+            ModelClass = self._import_model_type(self.models[model_name][1])
+            print(model_name)
+            print(ModelClass.__docs__)
         return
 
 

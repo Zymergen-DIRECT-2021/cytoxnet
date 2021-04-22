@@ -68,7 +68,7 @@ featurize(dataframe,
 ### `cytoxnet/dataprep/dataprep.py`
 
 ```
-convert_to_catagorical(dataframe,
+convert_to_categorical(dataframe,
                        cols: list of str)
 ```
 - __Use Case__: (3)

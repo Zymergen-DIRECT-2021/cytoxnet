@@ -1,7 +1,7 @@
 # Cytoxnet Component Specification
-The package is intended as an exploration and a toolbox for the prediction of
-cytotoxicity of compounds, but aims to leverage datasets of other targets
-for transfer learning.
+The package is intended as a dataset exploration and a toolbox for the
+prediction of cytotoxicity of compounds, but aims to leverage datasets of other
+targets for transfer learning.
 ***
 ***
 ## package format

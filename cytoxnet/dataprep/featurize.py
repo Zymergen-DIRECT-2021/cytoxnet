@@ -1,8 +1,7 @@
-import pandas as pd
 import rdkit
 from rdkit import Chem
 import deepchem as dc
-import numpy as np
+
 
 def molstr_to_Mol(dataframe, strcolumnID='InChI String'):
     """
@@ -28,16 +27,17 @@ def molstr_to_Mol(dataframe, strcolumnID='InChI String'):
         print('incho')
         for inchi in dataframe[strcolumnID]:
             mol = Chem.MolFromInchi(inchi)
-            mols.append(mol) 
+            mols.append(mol)
 
     elif 'smiles' in strcolumnID.lower():
         print('smiles')
         for smiles in dataframe[strcolumnID]:
-            mol =  Chem.MolFromSmiles(smiles)
+            mol = Chem.MolFromSmiles(smiles)
             mols.append(mol)
 
     dataframe['Mol'] = mols
     return dataframe
+
 
 def add_features(dataframe, MolcolumnID='Mol', method='CircularFingerprint'):
     """
@@ -66,7 +66,8 @@ def add_features(dataframe, MolcolumnID='Mol', method='CircularFingerprint'):
 
     """
     # Check that set contains Mol objects
-    assert isinstance(dataframe['Mol'][0], rdkit.Chem.Mol), 'Mol column does not contain Mol object'
+    assert isinstance(dataframe['Mol'][0], rdkit.Chem.Mol),\
+        'Mol column does not contain Mol object'
     featurizer = getattr(dc.feat, method)()
     f_list = []
     for mol in dataframe['Mol']:
@@ -86,14 +87,6 @@ def add_features(dataframe, MolcolumnID='Mol', method='CircularFingerprint'):
 
     return dataframe
 
-def add_circular_fingerprint(df):
-    featurizer = dc.feat.CircularFingerprint()
-    f_list = [] 
-    for mol in df['Mol']:
-        f = featurizer.featurize(mol)
-        f_list.append(f)
-    df['CircularFingerprint'] = f_list
-    return df
 
 def get_descriptors(dataframe, descriptor_type):
     """

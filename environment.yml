@@ -1,10 +1,10 @@
 name: cytoxnet
 channels:
   - conda-forge
-  - defaults
 dependencies:
+  - deepchem=2.5
+  - numpy=1.9.*
   - tensorflow
-  - deepchem
   - rdkit
   - scikit-learn
 

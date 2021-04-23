@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - numpy=1.9.*
   - tensorflow
   - deepchem
   - rdkit

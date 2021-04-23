@@ -25,7 +25,7 @@ targets for transfer learning.
 ### `cytoxnet/dataprep/io.py`
 
 ```
-load_file(datafile: str,
+load_data(datafile: str,
           cols: str or list of str = None) -> pandas DataFrame
 ```
 - __Use Case__: (1)
@@ -53,10 +53,10 @@ clean_dataframe(dataframe,
 - __Outputs__: Dataframe
 
 ```
-featurize(dataframe,
+add_features(dataframe,
           target_cols: list of str,
           id_col: str = 'smiles',
-          featurizer: str = 'CircularFingerprint',
+          method: str = 'CircularFingerprint',
           descriptor_cols: list of str = None) -> dataframe
 ```
 - __Use Case__: (2)

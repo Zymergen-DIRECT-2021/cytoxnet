@@ -45,16 +45,20 @@ sklearn.gaussian_process._gpr.GaussianProcessRegressor
 
 from typing import Type, Union, List
 
+import altair as alt
 import deepchem
 import numpy
 import sklearn
 import tensorflow.keras
+
+import cytoxnet.models.analyze
 
 # typing
 Model = Type[deepchem.models.Model]
 Dataset = Type[deepchem.data.Dataset]
 Metric = Type[deepchem.metrics.Metric]
 Transformer = Type[deepchem.trans.Transformer]
+Viz = Type[alt.Chart]
 
 # a codex containing the available models and their information to grab
 # dict of `name`: (`short_descr`, `class_string`)
@@ -71,6 +75,11 @@ _models = {
         "(deepchem) Graph Convolutional Neural Network. Accepts graph\
  features.",
         "deepchem.models.GraphConvModel"
+    ),
+    "LASSO": (
+        "(sklearn) Least Absolute Shrinkage and Selection Operator. Accepts\
+ vector features",
+        "sklearn.linear_model.Lasso"
     )
 }
 
@@ -144,6 +153,7 @@ class ToxModel:
 
     def __init__(self,
                  model_name: str,
+                 tasks: List[str] = None,
                  transformers: List[Transformer] = None,
                  **kwargs):
         # pseudocode
@@ -168,12 +178,22 @@ class ToxModel:
             pass
         self._check_model_avail(model_name)
         ModelClass = ToxModel._import_model_type(self.models[model_name][1])
-        # initialize the model
-        model = ModelClass(**kwargs)
+        # save the tasks
+        if tasks is None:
+            print('WARNING: No tasks passed, assuming one target')
+            tasks = ['target',]
+        else:
+            assert type(tasks)  == list,\
+                "tasks must be list, not {}".format(type(tasks))
+            assert all([type(task) == str for task in tasks]),\
+                "tasks should all be string names"
+        self.tasks = tasks
 
         # if the model is already deepchem, check and handle if classify or
         # regress was chosen
-        if isinstance(model, deepchem.models.Model):
+        if issubclass(ModelClass, deepchem.models.Model):
+            # initialize the model
+            model = ModelClass(n_tasks = len(self.tasks), **kwargs)
             if hasattr(model, 'mode') and 'mode' not in kwargs.keys():
                 print(
                     'WARNING: `mode` not passed so using the default\
@@ -181,7 +201,8 @@ for the task: {}'.format(model.mode)
                 )
             self.model = model
         # if the model was sklearn, wrap
-        elif isinstance(model, sklearn.base.BaseEstimator):
+        elif issubclass(ModelClass, sklearn.base.BaseEstimator):
+            model = ModelClass(**kwargs)
             self.model = deepchem.models.SklearnModel(model)
         
         # save transformers
@@ -385,6 +406,41 @@ for the task: {}'.format(model.mode)
                                       per_task_metrics, use_sample_weights,
                                       n_classes)
         return returns
+    
+    def visualize(self,
+                  viz_name: Union[str, object],
+                  dataset: Dataset,
+                  **kwargs) -> Viz:
+        """Vizualize the model results on a dataset.
+        
+        Uses a function accepting ToxModel instance and a dataset as the first
+        two positional arguments. Functions from cytoxnet.models.analyze can
+        be called by name.
+        
+        Parameters
+        ----------
+            viz_name : str or callable
+                The name of a visualization function in the package or a
+                function itself to use.
+            dataset : deepchem.data.Dataset
+                The dataset to use for visualization.
+            **kwargs passed to the visualization function
+        """
+        if not callable(viz_name):
+            assert type(viz_name) == str,\
+                "If not callable, viz_name must be a string name of function."
+            try:
+                func = getattr(cytoxnet.models.analyze, viz_name)
+            except AttributeError:
+                raise AttributeError(
+                    "{} not a valid function name in cytoxnet.models.analyze"\
+.format(viz_name)
+                )
+        else:
+            func = viz_name
+        
+        outs = func(self, dataset, **kwargs)
+        return outs
     
     @property
     def model(self):

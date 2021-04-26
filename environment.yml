@@ -8,4 +8,6 @@ dependencies:
   - deepchem
   - rdkit
   - scikit-learn
-
+  - altair
+  - requests
+  - matplotlib

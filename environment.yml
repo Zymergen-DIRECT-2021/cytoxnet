@@ -6,7 +6,7 @@ dependencies:
   - tensorflow
   - deepchem
   - rdkit
-  - scikit-learn
+  - scikit-learn=24.0
   - altair
   - requests
   - matplotlib

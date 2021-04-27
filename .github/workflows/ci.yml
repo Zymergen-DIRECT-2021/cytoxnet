@@ -21,7 +21,7 @@ jobs:
         echo $CONDA/bin >> $GITHUB_PATH
     - name: Install dependencies
       run: |
-        conda env update --file environment.yml --prune
+        conda env update --file environment.yml --name base --prune
     - name: Install testing dependencies
       run: |
         pip install flake8 pytest coverage
@@ -34,7 +34,7 @@ jobs:
         flake8 cytoxnet --docstring-convention numpy --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
     - name: Test coverage with pytest
       run: |
-        coverage run --omit="cytoxnet/tests/*" --source="cytoxnet" -m conda run pytest
+        coverage run --omit="cytoxnet/tests/*" --source="cytoxnet" -m pytest
     - name: Generate coverage report
       run: |
         coverage report

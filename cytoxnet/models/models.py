@@ -33,11 +33,8 @@ Gaussian process regression (GPR).
     Read more in the :ref:`User Guide <gaussian_process>`.
 
     .. versionadded:: 0.18
-
-    Parameters
-    ----------
 ...
->>>mymodel = ToxModel('GPR')
+>>>mymodel = ToxModel('GPR', alpha = 1e-4, **kwargs)
 >>>type(mymodel.model)
 sklearn.gaussian_process._gpr.GaussianProcessRegressor
 """

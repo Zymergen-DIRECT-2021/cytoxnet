@@ -1,6 +1,6 @@
-# import pandas as pd
-# import deepchem
-# import rdkit
+import rdkit
+from rdkit import Chem
+import deepchem as dc
 
 
 def molstr_to_Mol(dataframe, strcolumnID='InChI String'):
@@ -22,29 +22,24 @@ def molstr_to_Mol(dataframe, strcolumnID='InChI String'):
     column label is 'Mol'
 
     """
+    mols = []
+    if 'inchi' in strcolumnID.lower():
+        print('incho')
+        for inchi in dataframe[strcolumnID]:
+            mol = Chem.MolFromInchi(inchi)
+            mols.append(mol)
 
-    # get the column containting the string representation
-    # check whether column title contains "inche" or "smiles"
-    # if 'inchi' in strcolumnID.lower():
-    #     convert InChI to Mol
-    #    for inchi in column:
-    #        mol_obj = rdkit.Chem.inchi.MolFromInchi(inchi)
-    #        append to array first here probably
-    # elif 'smiles' in strcpolumnID.lower():
-    #    convert SMILES to Mol
-    #    for smiles in column:
-    #        mol_obj = MolFromSmiles(smiles)
-    #        probably append to an array
-    # else:
-    #    print('Column ID does not contain inchi or smiles')
+    elif 'smiles' in strcolumnID.lower():
+        print('smiles')
+        for smiles in dataframe[strcolumnID]:
+            mol = Chem.MolFromSmiles(smiles)
+            mols.append(mol)
 
-    # add the mol objects to the dataframe
-    # dataframe['Mol'] = mol_obj_list
-
+    dataframe['Mol'] = mols
     return dataframe
 
 
-def featurize(dataframe, MolcolumnID='Mol', method='CircularFingerprint'):
+def add_features(dataframe, MolcolumnID='Mol', method='CircularFingerprint'):
     """
     Featurizes a set of Mol objects using the desired feturization method.
 
@@ -70,14 +65,17 @@ def featurize(dataframe, MolcolumnID='Mol', method='CircularFingerprint'):
     object with the featurization method as the column ID
 
     """
-
-    # get the set of mol objects by extracting the specified column
-    # or iterating over it
-
     # Check that set contains Mol objects
-    # assert isinstance(object_in_set, rdkit.Chem.rdchem.Mol)
+    assert isinstance(dataframe['Mol'][0], rdkit.Chem.Mol),\
+        'Mol column does not contain Mol object'
+    featurizer = getattr(dc.feat, method)()
+    f_list = []
+    for mol in dataframe['Mol']:
+        f = featurizer.featurize(mol)
+        f_list.append(f)
+    dataframe[method] = f_list
 
-    # featurizer = getattr(deepchem.feat, method)
+    # assert isinstance(object_in_set, rdkit.Chem.rdchem.Mol)
 
     # molecules format optins-  rdkit.Chem.rdchem.Mol /
     # SMILES string / iterable

@@ -23,6 +23,7 @@ jobs:
       run: |
         conda env create --file environment.yml
         source activate cytoxnet
+        conda list
     - name: Install testing dependencies
       run: |
         pip install flake8 pytest coverage

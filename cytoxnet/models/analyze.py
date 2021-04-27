@@ -14,13 +14,10 @@ import altair as alt
 import deepchem.data
 import pandas
 
-import cytoxnet.models.models
-
-ToxModel = Type[cytoxnet.models.models.ToxModel]
 Dataset = Type[deepchem.data.Dataset]
 Viz = Type[alt.Chart]
 
-def pair_predict(model: ToxModel,
+def pair_predict(model: object,
                  dataset: Dataset,
                  task: str = None,
                  untransform: bool = True,
@@ -32,7 +29,7 @@ def pair_predict(model: ToxModel,
     
     Parameters
     ----------
-        model : :obj:cytoxnet.models.models.ToxModel
+        model : object with predict method
             The tox model to evaluate.
         dataset : :obj:deepchem.data.Dataset
             The testing dataset to be used for evaluation
@@ -49,16 +46,20 @@ def pair_predict(model: ToxModel,
             The visualization of predictions.
     """
     # check inputs
-    assert isinstance(model, cytoxnet.models.models.ToxModel),\
-        "`model` not a ToxModel"
-    assert hasattr(model, 'model'),\
-        "`model` does not have a `model` attribute (the predictor)"
+    assert hasattr(model, 'predict'),\
+        "`model` does not have a `predict` method"
     assert isinstance(dataset, deepchem.data.Dataset),\
         "`dataset` is not a dataset object."
-    
+    if len(model.tasks) > 1:
+        assert task in model.tasks,\
+            "The problem is multitasked, but the passed task does not\
+ correspond to one of them"
+    else:
+        task = model.tasks[0]
     # make predictions - a numpy array
     predictions = model.predict(dataset, untransform=untransform)
     predictions = predictions.reshape(-1, len(model.tasks))
+    print(predictions.shape)
     if untransform:
         assert hasattr(model, 'transformers'),\
             "untransform specified but the model has no transformers"
@@ -79,12 +80,6 @@ def pair_predict(model: ToxModel,
         df[task_+': true'] = y[:,i]
         df[task_+': predicted'] = predictions[:,i]
     
-    if len(model.tasks) > 1:
-        assert task in model.tasks,\
-            "The problem is multitasked, but the passed task does not\
- correspond to one of them"
-    else:
-        task = model.tasks[0]
     # x and y titles
     xl = task+': true'
     yl = task+': predicted'

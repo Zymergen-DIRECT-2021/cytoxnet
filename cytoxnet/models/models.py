@@ -62,7 +62,7 @@ Viz = Type[alt.Chart]
 
 # a codex containing the available models and their information to grab
 # dict of `name`: (`short_descr`, `class_string`)
-_models = {
+_MODELS = {
     "GPR": (
         "(sklearn) Gaussian Process Regressor. Accepts vector features.",
         "sklearn.gaussian_process.GaussianProcessRegressor",
@@ -143,7 +143,7 @@ class ToxModel:
     sklearn.gaussian_process._gpr.GaussianProcessRegressor
     """
 
-    models = _models
+    models = _MODELS
     """dict: Codex of available models.
 
     Dictionary of `model_name`: (`model_class`, `short_description`). Models
@@ -176,7 +176,7 @@ class ToxModel:
             )
         else:
             pass
-        self._check_model_avail(model_name)
+        ToxModel._check_model_avail(model_name)
         ModelClass = ToxModel._import_model_type(self.models[model_name][1])
         # save the tasks
         if tasks is None:
@@ -213,7 +213,7 @@ for the task: {}'.format(model.mode)
         self.fit = self.model.fit
         return 
 
-    def _check_model_avail(self, model_name: str):
+    def _check_model_avail(model_name: str):
         """Check if model name is one of the available models.
 
         Parameters
@@ -221,10 +221,10 @@ for the task: {}'.format(model.mode)
             model_name : str
                 The name of the model type to check.
         """
-        if model_name not in self.models.keys():
+        if model_name not in ToxModel.models.keys():
             raise AttributeError(
                 "The requested model '{}' is not an available model. Current\
- available models: {}".format(model_name, list(self.models.keys()))
+ available models: {}".format(model_name, list(ToxModel.models.keys()))
             )
         else:
             return
@@ -284,15 +284,7 @@ for the task: {}'.format(model.mode)
                 print(name+': ', desc)
         # the user wants help on a specific model type
         elif type(model_name) == str:
-            avail_models = list(ToxModel.models.keys())
-            if model_name not in avail_models:
-                raise AttributeError(
-                    '{} not an available model from: {}'.format(
-                        model_name, avail_models
-                    )
-                )
-            else:
-                pass
+            ToxModel._check_model_avail(model_name)
             # need to import the class first
             ModelClass = ToxModel._import_model_type(
                 ToxModel.models[model_name][1]
@@ -301,6 +293,17 @@ for the task: {}'.format(model.mode)
             help(ModelClass)
         return
     
+    def _get_transformers(self, untransform):
+        """Retrieve the transformers if untransform specified."""
+        if untransform == False:
+            transformers = []
+        else:
+            assert hasattr(self, 'transformers'),\
+                "untransform was specifed but no transformers saved at the\
+ transform attribute."
+            transformers = self.transformers
+        return transformers
+            
     def predict(self,
                 dataset: Dataset,
                 untransform: bool = False) -> numpy.ndarray:
@@ -316,15 +319,8 @@ for the task: {}'.format(model.mode)
             Untransform predictions with the transformers saved in the
             `transformers` attribute.
         """
-        if untransform == False:
-            transformers = []
-        else:
-            assert hasattr(self, 'transformers'),\
-                "untransform was specifed but no transformers saved at the\
- transform attribute."
-            transformers = self.transformers
-        
-        predictions = self.model.predict(dataset, transformers)
+        transformers = self._get_transformers(untransform)
+        predictions = self.model.predict(dataset, transformers=transformers)
         return predictions
     
     def evaluate(self,
@@ -374,13 +370,7 @@ for the task: {}'.format(model.mode)
           then returns a second dictionary of scores for each task
           separately.
         """
-        if untransform == False:
-            transformers = []
-        else:
-            assert hasattr(self, 'transformers'),\
-                "untransform was specifed but no transformers saved at the\
- transform attribute."
-            transformers = self.transformers
+        transformers = self._get_transformers(untransform)
             
         # transform string metrics to class
         metrics_ = []
@@ -401,10 +391,13 @@ for the task: {}'.format(model.mode)
                     )
                 )
             metrics_.append(metric_)
-            
-        returns = self.model.evaluate(dataset, metrics_, transformers,
-                                      per_task_metrics, use_sample_weights,
-                                      n_classes)
+
+        returns = self.model.evaluate(dataset,
+                                      metrics=metrics_,
+                                      transformers=transformers,
+                                      per_task_metrics=per_task_metrics,
+                                      use_sample_weights=use_sample_weights,
+                                      n_classes=n_classes)
         return returns
     
     def visualize(self,
@@ -439,7 +432,7 @@ for the task: {}'.format(model.mode)
         else:
             func = viz_name
         
-        outs = func(self, dataset, **kwargs)
+        outs = func(model=self, dataset=dataset, **kwargs)
         return outs
     
     @property
@@ -464,7 +457,10 @@ for the task: {}'.format(model.mode)
     
     @transformers.setter
     def transformers(self, new_transformers):
-        new_transformers = list(new_transformers)
+        if type(new_transformers) == list:
+            pass
+        else:
+            raise TypeError('transformers must be list')
         for t in new_transformers:
             assert isinstance(t, deepchem.trans.Transformer),\
                 "Cannot set transformers, not a deepchem transformer"

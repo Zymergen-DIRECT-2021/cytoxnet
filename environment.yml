@@ -6,6 +6,3 @@ dependencies:
   - altair
   - deepchem=2.5.0
   - rdkit
-  - pip=21.1
-  - pip:
-    - tensorflow==2.4.*

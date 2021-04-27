@@ -9,21 +9,22 @@ import numpy as np
 import cytoxnet.models.analyze
 import cytoxnet.models.models
 
+
 def test_pair_predict():
     """Plot of predictions vs true values."""
     # set up a mock model to use
     model = mock.MagicMock(spec=cytoxnet.models.models.ToxModel)
     model.tasks = ['target']
-    model.predict.return_value = np.array([1,2,3,4,5]).reshape(-1,1)
+    model.predict.return_value = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)
     dataset = deepchem.data.NumpyDataset(
-        X=np.array(np.random.random((5,2))),
-        y=np.array([1,3,3,4,5]).reshape(-1,1)
+        X=np.array(np.random.random((5, 2))),
+        y=np.array([1, 3, 3, 4, 5]).reshape(-1, 1)
     )
     transformer = mock.MagicMock()
     transformer.untransform.return_value = np.array(
-        [1,2,3,4,5]
-    ).reshape(-1,1)
-    with mock.patch('cytoxnet.models.analyze.alt') as mocked_altair:
+        [1, 2, 3, 4, 5]
+    ).reshape(-1, 1)
+    with mock.patch('cytoxnet.models.analyze.alt'):
         # no transform should work
         cytoxnet.models.analyze.pair_predict(
             model, dataset, untransform=False)
@@ -41,12 +42,12 @@ def test_pair_predict():
                 model, dataset)
         # specify it this time
         model.predict.return_value = np.array(
-            [[1,2,3,4,5], [1,2,3,4,5]]
+            [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]]
         ).T
         dataset = deepchem.data.NumpyDataset(
-            X=np.array(np.random.random((5,2))),
+            X=np.array(np.random.random((5, 2))),
             y=np.array(
-                [[1,2,3,4,5], [1,2,3,4,5]]
+                [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]]
             ).T
         )
         chart = cytoxnet.models.analyze.pair_predict(

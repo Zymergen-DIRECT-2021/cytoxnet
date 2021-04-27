@@ -17,16 +17,17 @@ import pandas
 Dataset = Type[deepchem.data.Dataset]
 Viz = Type[alt.Chart]
 
+
 def pair_predict(model: object,
                  dataset: Dataset,
                  task: str = None,
                  untransform: bool = True,
                  return_df: bool = False) -> Viz:
     """Plot pairwise regression predictions.
-    
+
     Plots the model's predicted values against its true values, as well as
     the fit line of predictions against the x = y perfect model.
-    
+
     Parameters
     ----------
         model : object with predict method
@@ -39,7 +40,7 @@ def pair_predict(model: object,
             Whether or not to plot untransformed target values.
         return_df : bool, default False
             Whether to return a dataframe of predictions and true values.
-    
+
     Returns
     -------
         chart : :obj:altair.Chart
@@ -68,26 +69,26 @@ def pair_predict(model: object,
             y = trans.untransform(y)
     else:
         y = dataset.y
-    
+
     assert predictions.shape == y.shape,\
         "predictions and true values should have the same shape."
     assert y.shape[-1] == len(model.tasks),\
         "Number targets predicted does not match number of tasks."
-    
+
     # handle tasks
     df = pandas.DataFrame()
     for i, task_ in enumerate(model.tasks):
-        df[task_+': true'] = y[:,i]
-        df[task_+': predicted'] = predictions[:,i]
-    
+        df[task_ + ': true'] = y[:, i]
+        df[task_ + ': predicted'] = predictions[:, i]
+
     # x and y titles
-    xl = task+': true'
-    yl = task+': predicted'
+    xl = task + ': true'
+    yl = task + ': predicted'
 
     # make the plot
     chart = alt.Chart(df).mark_point().encode(
-        alt.X(xl+':Q', scale=alt.Scale(zero=False)),
-        alt.Y(yl+':Q', scale=alt.Scale(zero=False))
+        alt.X(xl + ':Q', scale=alt.Scale(zero=False)),
+        alt.Y(yl + ':Q', scale=alt.Scale(zero=False))
     )
     chart = chart + chart.transform_regression(
         xl, yl
@@ -96,21 +97,19 @@ def pair_predict(model: object,
     # add a x=y line
     xmin, xmax = df[xl].min(), df[xl].max()
     ymin, ymax = df[yl].min(), df[yl].max()
-    if ymax-ymin > xmax-xmin:
+    if ymax - ymin > xmax - xmin:
         ran = ymin, ymax
     else:
         ran = xmin, xmax
 
-    linedf = pandas.DataFrame({xl:[*ran], yl:[*ran]})
+    linedf = pandas.DataFrame({xl: [*ran], yl: [*ran]})
 
     line = alt.Chart(linedf).mark_line(color='black').encode(
-        alt.X(xl+':Q'),
-        alt.Y(yl+':Q')
+        alt.X(xl + ':Q'),
+        alt.Y(yl + ':Q')
     )
     chart = chart + line
     if return_df:
         return chart, df
     else:
         return chart
-        
-    

@@ -49,7 +49,6 @@ import altair as alt
 import deepchem
 import numpy
 import sklearn
-import tensorflow.keras
 
 import cytoxnet.models.analyze
 
@@ -168,7 +167,7 @@ class ToxModel:
         # >return instance
 
         # checking and retrieving model class
-        if type(model_name) != str:
+        if not isinstance(model_name, str):
             raise TypeError(
                 'Model name should be type str, not {}'.format(
                     type(model_name)
@@ -181,11 +180,11 @@ class ToxModel:
         # save the tasks
         if tasks is None:
             print('WARNING: No tasks passed, assuming one target')
-            tasks = ['target',]
+            tasks = ['target', ]
         else:
-            assert type(tasks)  == list,\
+            assert isinstance(tasks, list),\
                 "tasks must be list, not {}".format(type(tasks))
-            assert all([type(task) == str for task in tasks]),\
+            assert all([isinstance(task, str) for task in tasks]),\
                 "tasks should all be string names"
         self.tasks = tasks
 
@@ -193,7 +192,7 @@ class ToxModel:
         # regress was chosen
         if issubclass(ModelClass, deepchem.models.Model):
             # initialize the model
-            model = ModelClass(n_tasks = len(self.tasks), **kwargs)
+            model = ModelClass(n_tasks=len(self.tasks), **kwargs)
             if hasattr(model, 'mode') and 'mode' not in kwargs.keys():
                 print(
                     'WARNING: `mode` not passed so using the default\
@@ -204,14 +203,14 @@ for the task: {}'.format(model.mode)
         elif issubclass(ModelClass, sklearn.base.BaseEstimator):
             model = ModelClass(**kwargs)
             self.model = deepchem.models.SklearnModel(model)
-        
+
         # save transformers
         if transformers is not None:
             self.transformers = transformers
-        
+
         # set top level class methods that do not need to be modified
         self.fit = self.model.fit
-        return 
+        return
 
     def _check_model_avail(model_name: str):
         """Check if model name is one of the available models.
@@ -276,14 +275,14 @@ for the task: {}'.format(model.mode)
         # >if model name is none, print names and short descrs
         # >otherwise print docs for the requested model name
         # the user wants general help on available models
-        if model_name == None:
+        if model_name is None:
             print('=================')
             print('AVAILABLE MODELS:')
             print('=================')
             for name, (desc, mod) in ToxModel.models.items():
-                print(name+': ', desc)
+                print(name + ': ', desc)
         # the user wants help on a specific model type
-        elif type(model_name) == str:
+        elif isinstance(model_name, str):
             ToxModel._check_model_avail(model_name)
             # need to import the class first
             ModelClass = ToxModel._import_model_type(
@@ -292,10 +291,10 @@ for the task: {}'.format(model.mode)
             print('Tox model: ', model_name)
             help(ModelClass)
         return
-    
+
     def _get_transformers(self, untransform):
         """Retrieve the transformers if untransform specified."""
-        if untransform == False:
+        if not untransform:
             transformers = []
         else:
             assert hasattr(self, 'transformers'),\
@@ -303,14 +302,14 @@ for the task: {}'.format(model.mode)
  transform attribute."
             transformers = self.transformers
         return transformers
-            
+
     def predict(self,
                 dataset: Dataset,
                 untransform: bool = False) -> numpy.ndarray:
         """Makes predictions on dataset.
-        
+
         Wrapper of deepchem predict method.
-        
+
         Parameters
         ----------
         dataset: Dataset
@@ -322,7 +321,7 @@ for the task: {}'.format(model.mode)
         transformers = self._get_transformers(untransform)
         predictions = self.model.predict(dataset, transformers=transformers)
         return predictions
-    
+
     def evaluate(self,
                  dataset: Dataset,
                  metrics: List[Union[str, Metric]],
@@ -332,7 +331,7 @@ for the task: {}'.format(model.mode)
                  n_classes: int = None,
                  **kwargs) -> dict:
         """Evaluates the performance of this model on specified dataset.
-        
+
         Option wrapper of deepchem evaluate method.
         This function uses `Evaluator` under the hood to perform model
         evaluation. As a result, it inherits the same limitations of
@@ -371,11 +370,11 @@ for the task: {}'.format(model.mode)
           separately.
         """
         transformers = self._get_transformers(untransform)
-            
+
         # transform string metrics to class
         metrics_ = []
         for metric in metrics:
-            if type(metric) == str:
+            if isinstance(metric, str):
                 try:
                     metric_ = getattr(deepchem.metrics, metric)
                 except AttributeError:
@@ -399,17 +398,17 @@ for the task: {}'.format(model.mode)
                                       use_sample_weights=use_sample_weights,
                                       n_classes=n_classes)
         return returns
-    
+
     def visualize(self,
                   viz_name: Union[str, object],
                   dataset: Dataset,
                   **kwargs) -> Viz:
         """Vizualize the model results on a dataset.
-        
+
         Uses a function accepting ToxModel instance and a dataset as the first
         two positional arguments. Functions from cytoxnet.models.analyze can
         be called by name.
-        
+
         Parameters
         ----------
             viz_name : str or callable
@@ -420,44 +419,44 @@ for the task: {}'.format(model.mode)
             **kwargs passed to the visualization function
         """
         if not callable(viz_name):
-            assert type(viz_name) == str,\
+            assert isinstance(viz_name, str),\
                 "If not callable, viz_name must be a string name of function."
             try:
                 func = getattr(cytoxnet.models.analyze, viz_name)
             except AttributeError:
                 raise AttributeError(
-                    "{} not a valid function name in cytoxnet.models.analyze"\
-.format(viz_name)
+                    "{} not a valid function name in cytoxnet.models.analyze"
+                    .format(viz_name)
                 )
         else:
             func = viz_name
-        
+
         outs = func(model=self, dataset=dataset, **kwargs)
         return outs
-    
+
     @property
     def model(self):
         """:obj:deepchem.models.Model : model being used for tox prediction."""
         return self._model
-    
+
     @model.setter
     def model(self, new_model):
         assert isinstance(new_model, deepchem.models.Model),\
             "Input of type {} is not a deepchem model.".format(type(new_model))
         self._model = new_model
         return
-    
+
     @property
     def transformers(self):
         """list of :obj:deepchem.transformers.Transformer
-        
+
         Transformations done to training data to reverse transform outputs.
         """
         return self._transformers
-    
+
     @transformers.setter
     def transformers(self, new_transformers):
-        if type(new_transformers) == list:
+        if isinstance(new_transformers, list):
             pass
         else:
             raise TypeError('transformers must be list')

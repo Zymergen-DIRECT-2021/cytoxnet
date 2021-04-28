@@ -1,12 +1,9 @@
-name: cytoxnet
+name: base
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - tensorflow
-  - deepchem
-  - rdkit
-  - scikit-learn=0.24
   - altair
-  - requests
-  - matplotlib
+  - python=3.7.*
+  - deepchem=2.5.0
+  - rdkit

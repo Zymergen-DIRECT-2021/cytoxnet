@@ -1,4 +1,4 @@
-name: base
+name: cytoxnet
 channels:
   - conda-forge
   - defaults

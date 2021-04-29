@@ -26,7 +26,7 @@ if __name__ == "__main__":
         long_description=long_description,
         include_package_data=False, #no data yet, True if we want to include data
         keywords=[
-            'Machine Learning', 'Synthetic Biology', 'Cytotocicity'
+            'Machine Learning', 'Synthetic Biology', 'Cytotoxicity'
         ],
         license='MIT',
         packages=setuptools.find_packages(exclude="tests"),

@@ -60,7 +60,6 @@ def pair_predict(model: object,
     # make predictions - a numpy array
     predictions = model.predict(dataset, untransform=untransform)
     predictions = predictions.reshape(-1, len(model.tasks))
-    print(predictions.shape)
     if untransform:
         assert hasattr(model, 'transformers'),\
             "untransform specified but the model has no transformers"
@@ -69,7 +68,7 @@ def pair_predict(model: object,
             y = trans.untransform(y)
     else:
         y = dataset.y
-
+    y = y.reshape(-1, len(model.tasks))
     assert predictions.shape == y.shape,\
         "predictions and true values should have the same shape."
     assert y.shape[-1] == len(model.tasks),\

@@ -24,13 +24,11 @@ def molstr_to_Mol(dataframe, strcolumnID='InChI String'):
     """
     mols = []
     if 'inchi' in strcolumnID.lower():
-        print('incho')
         for inchi in dataframe[strcolumnID]:
             mol = Chem.MolFromInchi(inchi)
             mols.append(mol)
 
     elif 'smiles' in strcolumnID.lower():
-        print('smiles')
         for smiles in dataframe[strcolumnID]:
             mol = Chem.MolFromSmiles(smiles)
             mols.append(mol)

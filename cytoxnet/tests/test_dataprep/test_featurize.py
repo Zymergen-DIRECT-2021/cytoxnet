@@ -18,7 +18,7 @@ def test_molstr_to_Mol():
     filename = os.path.join(dir_path, '..', 'data', 'chembl_example.csv')
 
     df = io.load_data(filename,
-                      col_id='Molecule ChEMBL ID')
+                      id_cols='Smiles')
     df_1 = featurize.molstr_to_Mol(df, strcolumnID='Smiles')
     assert 'Mol' in df_1.columns, 'No Mol column created'
     assert isinstance(df_1['Mol'][1], rdkit.Chem.Mol), 'Mols are not\
@@ -31,7 +31,7 @@ def test_add_features():
     filename = os.path.join(dir_path, '..', 'data', 'chembl_example.csv')
 
     df = io.load_data(filename,
-                      col_id='Molecule ChEMBL ID')
+                      id_cols='Smiles')
     df_1 = featurize.molstr_to_Mol(df, strcolumnID='Smiles')
     df_2 = featurize.add_features(df_1)
 

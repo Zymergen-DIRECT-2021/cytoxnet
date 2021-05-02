@@ -8,10 +8,10 @@ import pandas as pd
 
 
 def load_data(csv_file,
-              cols = None,
-              id_cols = None,
-              duplicates = 'drop',
-              nans = 'keep'):
+              cols=None,
+              id_cols=None,
+              duplicates='drop',
+              nans='keep'):
     """
     Loads a data file into a dataframe containing the raw data.
 
@@ -36,10 +36,10 @@ def load_data(csv_file,
     is passed
 
     """
-    if type(id_cols) == str:
+    if isinstance(id_cols, str):
         id_cols = [id_cols]
     # assert file exists and contains data
-    if type(csv_file) == str:
+    if isinstance(csv_file, str):
         assert os.path.exists(csv_file), 'File name does not exist'
     # run any more checks specific to the data that we may want to add
     # load a csv file into a dataframe
@@ -49,7 +49,7 @@ def load_data(csv_file,
         df = df[cols]
     else:
         pass
-    
+
     # handle dups and nans
     if nans == 'drop':
         df.dropna(subset=cols, inplace=True)
@@ -68,10 +68,11 @@ def load_data(csv_file,
             raise ValueError(
                 '{} not a valid option for duplicate'.format(duplicates)
             )
-            
+
     else:
         pass
     return df
+
 
 def load_chembl_ecoli():
     # get the path in the package
@@ -82,7 +83,8 @@ def load_chembl_ecoli():
                    cols=['smiles', 'MIC'],
                    id_cols=['smiles'])
     return df
-    
+
+
 def load_zhu_rat():
     path = pkg_resources.resource_stream(
         __name__, '../data/zhu_rat_LD50.csv'
@@ -92,10 +94,11 @@ def load_zhu_rat():
                    id_cols=['smiles'])
     return df
 
-def load_fillipo(species=['algea', 'fish', 'daphnia'], nans = 'drop'):
+
+def load_fillipo(species=['algea', 'fish', 'daphnia'], nans='drop'):
     assert len(species) > 0,\
         "Secies must be one or more of algea, fish, daphnia"
-        
+
     path = pkg_resources.resource_stream(__name__, '../data/fillipo.csv')
     cols = ['smiles']
     # get the target columns to consider
@@ -105,10 +108,9 @@ def load_fillipo(species=['algea', 'fish', 'daphnia'], nans = 'drop'):
         cols.append('fish_LC50')
     if 'daphnia' in species:
         cols.append('daphnia_EC50')
-    
+
     df = load_data(path,
                    cols=cols,
                    id_cols=['smiles'],
                    nans=nans)
     return df
-        

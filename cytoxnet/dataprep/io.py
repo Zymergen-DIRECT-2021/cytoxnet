@@ -11,7 +11,7 @@ def load_data(csv_file,
               cols = None,
               id_cols = None,
               duplicates = 'drop',
-              nans = 'drop'):
+              nans = 'keep'):
     """
     Loads a data file into a dataframe containing the raw data.
 
@@ -51,6 +51,14 @@ def load_data(csv_file,
         pass
     
     # handle dups and nans
+    if nans == 'drop':
+        df.dropna(subset=cols, inplace=True)
+    elif nans == 'keep':
+        pass
+    else:
+        raise ValueError(
+            '{} not a valid option for nans'.format(nans)
+        )
     if id_cols is not None:
         if duplicates == 'drop':
             df.drop_duplicates(subset=id_cols, inplace=True)
@@ -61,23 +69,46 @@ def load_data(csv_file,
                 '{} not a valid option for duplicate'.format(duplicates)
             )
             
-        if nans == 'drop':
-            df.dropna(subset=id_cols, inplace=True)
-        elif nans == 'keep':
-            pass
-        else:
-            raise ValueError(
-                '{} not a valid option for nans'.format(nans)
-            )
     else:
         pass
     return df
 
 def load_chembl_ecoli():
     # get the path in the package
-    path = pkg_resources.resource_stream(__name__, '../data/chembl_ecoli_MIC.csv')
+    path = pkg_resources.resource_stream(
+        __name__, '../data/chembl_ecoli_MIC.csv'
+    )
     df = load_data(path,
                    cols=['smiles', 'MIC'],
-                   id_cols=['smiles', 'MIC'])
+                   id_cols=['smiles'])
     return df
     
+def load_zhu_rat():
+    path = pkg_resources.resource_stream(
+        __name__, '../data/zhu_rat_LD50.csv'
+    )
+    df = load_data(path,
+                   cols=['smiles', 'LD50'],
+                   id_cols=['smiles'])
+    return df
+
+def load_fillipo(species=['algea', 'fish', 'daphnia'], nans = 'drop'):
+    assert len(species) > 0,\
+        "Secies must be one or more of algea, fish, daphnia"
+        
+    path = pkg_resources.resource_stream(__name__, '../data/fillipo.csv')
+    cols = ['smiles']
+    # get the target columns to consider
+    if 'algea' in species:
+        cols.append('algea_EC50')
+    if 'fish' in species:
+        cols.append('fish_LC50')
+    if 'daphnia' in species:
+        cols.append('daphnia_EC50')
+    
+    df = load_data(path,
+                   cols=cols,
+                   id_cols=['smiles'],
+                   nans=nans)
+    return df
+        

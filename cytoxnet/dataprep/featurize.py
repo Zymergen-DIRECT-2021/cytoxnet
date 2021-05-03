@@ -39,7 +39,10 @@ def molstr_to_Mol(dataframe, strcolumnID='InChI String'):
     return dataframe
 
 
-def add_features(dataframe, MolcolumnID='Mol', method='CircularFingerprint',**kwargs):
+def add_features(dataframe,
+                 MolcolumnID='Mol',
+                 method='CircularFingerprint',
+                 **kwargs):
     """
     Featurizes a set of Mol objects using the desired feturization method.
 

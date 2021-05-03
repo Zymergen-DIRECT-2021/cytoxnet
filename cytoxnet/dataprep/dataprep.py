@@ -1,3 +1,8 @@
+import deepchem as dc
+import numpy as np
+import pandas as pd
+from sklearn import preprocessing
+
 def convert_to_categorical(dataframe, cols=None):
     """
     Converts non-numerical categorical values to integers.  This function is most useful for ordinal variables.
@@ -22,7 +27,7 @@ def convert_to_categorical(dataframe, cols=None):
 
         for col in cols:
             if len(
-                    df1[col].shape) == 1:  # for 1D arrays (usally y, target variables)
+                    dataframe[col].shape) == 1:  # for 1D arrays (usally y, target variables)
                 # define label encoder
                 encoder = preprocessing.LabelEncoder()
                 # create new columns and preserve the original columns

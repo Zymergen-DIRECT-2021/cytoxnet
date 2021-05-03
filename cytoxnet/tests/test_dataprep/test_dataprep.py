@@ -11,9 +11,9 @@ Tests for dataprep.py
 
 
 #def test_convert_to_dataset():
-    """
-    Test convert_to_dataset function
-    """
+#    """
+#    Test convert_to_dataset function
+#    """
 
 #    dir_path = os.path.dirname(os.path.realpath(__file__))
 #    filename = os.path.join(dir_path, '..', 'data', 'chembl_example.csv')
@@ -35,9 +35,9 @@ Tests for dataprep.py
 
 
 #def test_data_transformation():
-    """
-    Test data_transformation function
-    """
+#    """
+#    Test data_transformation function
+#    """
 
 #    dir_path = os.path.dirname(os.path.realpath(__file__))
 #    filename = os.path.join(dir_path, '..', 'data', 'chembl_example.csv')
@@ -61,9 +61,9 @@ Tests for dataprep.py
 
 
 #def test_data_splitting():
-    """
-    Test data_splitting function
-    """
+#    """
+#    Test data_splitting function
+#    """
 
 #    dir_path = os.path.dirname(os.path.realpath(__file__))
 #    filename = os.path.join(dir_path, '..', 'data', 'chembl_example.csv')

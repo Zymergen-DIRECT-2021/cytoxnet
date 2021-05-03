@@ -51,8 +51,7 @@ def convert_to_dataset(dataframe,
                        X_col: str = 'X',
                        y_col: str = 'y',
                        w_col: str = None,
-                       id_col: str = None,
-                       return_csv=False):
+                       id_col: str = None):
     """
     Converts dataframe into a deepchem dataset object.
 
@@ -63,11 +62,10 @@ def convert_to_dataset(dataframe,
     - y_col: (str or List[str]) name(s) of the column(s) containing the y array.
     - w_col: (str or List[str]) name(s) of the column(s) containing the w array.
     - id_col: (str) name of the column containing the ids.
-    - return_csv: (True/False) whether a viewable csv of the data will be returned with the dataset object.
 
     Returns
     -------
-    - data_objs: tuple containing deepchem dataset object at index [0] and csv at index[1], or just deepchem dataset object
+    - dataset: deepchem dataset object
     """
     # define x
     X = dataframe[X_col].values
@@ -94,17 +92,7 @@ def convert_to_dataset(dataframe,
     # create deepchem dataset object
     dataset = dc.data.NumpyDataset(X, y, w, ids)
 
-    # return dataset and csv of current dataframe if return_csv equals True
-    # return only dataset if return_csv equals False or unspecified
-    if return_csv is True:
-        csv = dataframe.to_csv(index=True, header=True)
-        print('returned value contains both dataset object and csv file')
-        data_objs = (dataset, csv)
-    else:
-        data_objs = (dataset)
-        print(type(data_objs))
-
-    return data_objs
+    return dataset
 
 
 def data_transformation(dataset,

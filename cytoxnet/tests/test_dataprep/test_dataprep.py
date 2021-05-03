@@ -8,25 +8,40 @@ from cytoxnet.dataprep import dataprep
 from cytoxnet.dataprep import io
 from cytoxnet.dataprep import featurize
 import math
+import deepchem as dc
+import numpy as np
+import pytest
 
 
-def test_convert_to_dataset():
+@pytest.fixture
+def sample_data():
+    """
+    Import sample dataframes for use in test_dataprep.py functions
+    """
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    filename = os.path.join(dir_path, '..', 'data', 'sample_df1')
+    df = pd.read_csv(filename)
+    return df
+
+
+@pytest.fixture
+def test_convert_to_dataset(sample_data):
     """
     Test convert_to_dataset function
     """
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    filename = os.path.join(dir_path, '..', 'data', 'chembl_example.csv')
+    # create dataframe
+    df = sample_data
 
-    df = io.load_data(filename,
-                      col_id='Molecule ChEMBL ID')
-    df_1 = featurize.molstr_to_Mol(df, strcolumnID='Smiles')
-    df_2 = featurize.add_features(df_1)
+    # convert dataframe to dataset
+    dataset = dataprep.convert_to_dataset(
+        dataframe=df,
+        X_col='CircularFingerprint',
+        y_col='Standard Value',
+        w_col=None,
+        id_col=None)
 
-    dataset, csv = dataprep.convert_to_dataset(
-        dataframe=df_2, X_col='CircularFingerprint', y_col='Standard Value', w_col=None, id_col=None, return_csv=True)
-
-    assert type(csv) is str, 'CSV not returned when specified'
     assert isinstance(dataset, dc.data.datasets.NumpyDataset), 'Dataset is not\
         deepchem NumpyDataset object'
     assert dataset.X.shape[1] > 0, 'Dataset is incorrect shape'
@@ -34,64 +49,71 @@ def test_convert_to_dataset():
     return
 
 
-def test_data_transformation():
-   """
-   Test data_transformation function
-   """
+@pytest.fixture
+def test_data_transformation(sample_data):
+    """
+    Test data_transformation function
+    """
 
-   dir_path = os.path.dirname(os.path.realpath(__file__))
-   filename = os.path.join(dir_path, '..', 'data', 'chembl_example.csv')
+    # create dataframe
+    df = sample_data
 
-   df = io.load_data(filename,
-                     col_id='Molecule ChEMBL ID')
-   df_1 = featurize.molstr_to_Mol(df, strcolumnID='Smiles')
-   df_2 = featurize.add_features(df_1)
+    # convert dataframe to dataset
+    dataset = dataprep.convert_to_dataset(
+        dataframe=df,
+        X_col='CircularFingerprint',
+        y_col='Standard Value',
+        w_col=None,
+        id_col=None)
 
-   dataset, csv = dataprep.convert_to_dataset(
-       dataframe=df_2, X_col='CircularFingerprint', y_col='Standard Value', w_col=None, id_col=None, return_csv=False)
+    # transform feature data using Normalization Transformer first, followed
+    # by Min-Max Transformer
+    transformed_data, transformer_list = dataprep.data_transformation(
+        dataset=dataset, transformations=[
+            'NormalizationTransformer', 'MinMaxTransformer'], to_transform=['X'])
 
-   transformed_data, transformer_list = dataprep.data_transformation(
-       dataset=dataset, transformations=[
-           'NormalizationTransformer', 'MinMaxTransformer'], to_transform=['X'])
-
-   assert isinstance(
-       transformer_list[0], dc.trans.transformers.NormalizationTransformer), 'Transformer list\
+    assert isinstance(
+        transformer_list[0], dc.trans.transformers.NormalizationTransformer), 'Transformer list\
        ordered incorrectly'
-   return
+    return
 
 
-def test_data_splitting():
-   """
-   Test data_splitting function
-   """
+@pytest.fixture
+def test_data_splitting(sample_data):
+    """
+    Test data_splitting function
+    """
 
-   dir_path = os.path.dirname(os.path.realpath(__file__))
-   filename = os.path.join(dir_path, '..', 'data', 'chembl_example.csv')
+    # create dataframe
+    df = sample_data
 
-   df = io.load_data(filename,
-                     col_id='Molecule ChEMBL ID')
-   df_1 = featurize.molstr_to_Mol(df, strcolumnID='Smiles')
-   df_2 = featurize.add_features(df_1)
+    # convert dataframe to dataset
+    dataset = dataprep.convert_to_dataset(
+        dataframe=df_2,
+        X_col='CircularFingerprint',
+        y_col='Standard Value',
+        w_col=None,
+        id_col=None)
 
-   dataset, csv = dataprep.convert_to_dataset(
-       dataframe=df_2, X_col='CircularFingerprint', y_col='Standard Value', w_col=None, id_col=None, return_csv=False)
+    # transform feature data using Normalization Transformer
+    transformed_data, transformer_list = dataprep.data_transformation(
+        dataset=dataset, transformations=['NormalizationTransformer'], to_transform=['X'])
 
-   transformed_data, transformer_list = dataprep.data_transformation(
-       dataset=dataset, transformations=['NormalizationTransformer'], to_transform=['X'])
+    # split data using k-fold split
+    split = dataprep.data_splitting(
+        dataset=transformed_data,
+        splitter='RandomSplitter',
+        split_type='k',
+        k=7)
 
-   split = dataprep.data_splitting(
-       dataset=transformed_data,
-       splitter='RandomSplitter',
-       split_type='k',
-       k=7)
+    # split data using train-test split
+    train, test = dataprep.data_splitting(
+        dataset=transformed_data, splitter='RandomSplitter', split_type='train_test_split', frac_train=0.4)
+    a = train.X.shape[0] / test.X.shape[0]
+    b = 4
 
-   train, test = dataprep.data_splitting(
-       dataset=transformed_data, splitter='RandomSplitter', split_type='train_test_split', frac_train=0.4)
-   a = train.X.shape[0] / test.X.shape[0]
-   b = 4
-
-   assert np.shape(split) == (7, 2), 'k_fold_split is\
+    assert np.shape(split) == (7, 2), 'k_fold_split is\
        wrong shape'
-   assert math.isclose(a, b, rel_tol=0.05), 'Train-Test split has\
+    assert math.isclose(a, b, rel_tol=0.05), 'Train-Test split has\
        incorrect proportions'
-   return
+    return

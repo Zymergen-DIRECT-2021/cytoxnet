@@ -37,7 +37,7 @@ def molstr_to_Mol(dataframe, strcolumnID='InChI String'):
     return dataframe
 
 
-def add_features(dataframe, MolcolumnID='Mol', method='CircularFingerprint'):
+def add_features(dataframe, MolcolumnID='Mol', method='CircularFingerprint', **kwargs):
     """
     Featurizes a set of Mol objects using the desired feturization method.
 
@@ -66,7 +66,7 @@ def add_features(dataframe, MolcolumnID='Mol', method='CircularFingerprint'):
     # Check that set contains Mol objects
     assert isinstance(dataframe['Mol'][0], rdkit.Chem.Mol),\
         'Mol column does not contain Mol object'
-    featurizer = getattr(dc.feat, method)()
+    featurizer = getattr(dc.feat, method)(**kwargs)
     f_list = []
     for mol in dataframe['Mol']:
         f = featurizer.featurize(mol)

@@ -10,6 +10,7 @@ from cytoxnet.dataprep import featurize
 import math
 import deepchem as dc
 import numpy as np
+import pandas as pd
 import pytest
 
 

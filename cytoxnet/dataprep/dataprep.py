@@ -228,7 +228,6 @@ def dataset_prep(dataframe,
                  id_col=None,
                  splitter=None,
                  splitter_type=None,
-                 return_csv: bool = False,
                  **kwargs):
     """
     Wrapping functions for convert_to_dataset, data_transformation, and data_splitting
@@ -244,32 +243,20 @@ def dataset_prep(dataframe,
     - id_col: (str) name of the column containing the ids.
     - splitter: (str) class of deepchem split method
     - split_type: (str) type of split (k_fold_split/train_test_split/train_valid_test_split)
-    - return_csv: (True/False) whether a viewable csv of the data will be returned with the dataset object.
 
     Returns
     -------
     - split_data: tuple or list containing dataset splits
     - transformer_list: list of transformer objects used
-    - csv: csv file of input dataframe which can be saved for future use
     """
 
     # convert dataframe to dataset object
-    data = convert_to_dataset(
+    dataset = convert_to_dataset(
         dataframe=dataframe,
         X_col=input_features,
         y_col=label,
         w_col=weights,
-        id_col=id_col,
-        return_csv=return_csv)
-
-    if return_csv is True:
-        dataset = data[0]
-        csv = data[1]
-        print('csv file created')
-    else:
-        dataset = data
-        csv = None
-        print('no csv file created')
+        id_col=id_col)
 
     # transform data
     if transformations is not None:
@@ -286,4 +273,4 @@ def dataset_prep(dataframe,
         split_type=splitter_type,
         **kwargs)
 
-    return split_data, transformer_list, csv
+    return split_data, transformer_list

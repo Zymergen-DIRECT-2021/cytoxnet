@@ -89,7 +89,7 @@ def test_data_splitting(sample_data):
 
     # convert dataframe to dataset
     dataset = dataprep.convert_to_dataset(
-        dataframe=df_2,
+        dataframe=df,
         X_col='CircularFingerprint',
         y_col='Standard Value',
         w_col=None,

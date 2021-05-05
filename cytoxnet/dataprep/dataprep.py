@@ -68,11 +68,17 @@ def convert_to_dataset(dataframe,
     - dataset: deepchem dataset object
     """
     # define x
-    X = dataframe[X_col].values
-    if isinstance(X[0][0], np.ndarray):
-        X = np.stack(X).reshape(len(dataframe), -1)
-    else:
-        X = np.stack(X).reshape(len(dataframe))
+    if type(X_col) == str:
+        X_col = [X_col]
+    X_list = []
+    for col in X_col:
+        X_ = dataframe[col].values
+        X_ = np.vstack(X_)
+        X_list.append(X_)
+    X = np.hstack(X_list)
+    # need to check for object features
+    if not np.issubdtype(X.dtype, np.number):
+        X = X.reshape(-1)
 
     # define y
     y = dataframe[y_col].values

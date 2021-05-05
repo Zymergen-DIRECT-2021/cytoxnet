@@ -24,7 +24,7 @@ if __name__ == "__main__":
         description=
         'Tools for predicting cytotoxicity if compounds to microbes.',
         long_description=long_description,
-        include_package_data=False, #no data yet, True if we want to include data
+        include_package_data=True,
         keywords=[
             'Machine Learning', 'Synthetic Biology', 'Cytotocicity'
         ],

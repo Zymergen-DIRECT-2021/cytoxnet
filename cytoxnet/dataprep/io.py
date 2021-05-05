@@ -81,7 +81,8 @@ def load_chembl_ecoli():
     )
     df = load_data(path,
                    cols=['smiles', 'MIC'],
-                   id_cols=['smiles'])
+                   id_cols=['smiles'],
+                   nans="drop")
     return df
 
 
@@ -91,15 +92,16 @@ def load_zhu_rat():
     )
     df = load_data(path,
                    cols=['smiles', 'LD50'],
-                   id_cols=['smiles'])
+                   id_cols=['smiles'],
+                   nans='drop')
     return df
 
 
-def load_fillipo(species=['algea', 'fish', 'daphnia'], nans='drop'):
+def load_lunghini(species=['algea', 'fish', 'daphnia'], nans='drop'):
     assert len(species) > 0,\
         "Secies must be one or more of algea, fish, daphnia"
 
-    path = pkg_resources.resource_stream(__name__, '../data/fillipo.csv')
+    path = pkg_resources.resource_stream(__name__, '../data/lunghini.csv')
     cols = ['smiles']
     # get the target columns to consider
     if 'algea' in species:

@@ -7,6 +7,7 @@ Create and activate conda environment, then run the package setup from the repos
 ```
 conda env create --file environment.yml
 conda activate cytoxnet
+pip install tensorflow~=2.4
 pip install .
 ```
 The package can then be imported as `import cytoxnet`

@@ -46,6 +46,15 @@ def convert_to_categorical(dataframe, cols=None):
 
     return dataframe
 
+def handle_sparsity(dataframe,
+                    y_col: Union[str, List[str]],
+                    weight_col: str = 'w'):
+    """Prepares sparse data to be learned.
+    
+    Replace nans with 0.0 in the dataset so that it can be input to a model,
+    and create a weight matrix with all nan values as 0.0 weight so that they
+    do not introduce bias.
+    """
 
 def convert_to_dataset(dataframe,
                        X_col: str = 'X',
@@ -85,7 +94,7 @@ def convert_to_dataset(dataframe,
 
     # define weight
     if w_col is not None:
-        w = dataframe[w_col].values
+        w = np.vstack(dataframe[w_col].values)
     else:
         w = None
 
@@ -99,7 +108,6 @@ def convert_to_dataset(dataframe,
     dataset = dc.data.NumpyDataset(X, y, w, ids)
 
     return dataset
-
 
 def data_transformation(dataset,
                         transformations: list = ['NormalizationTransformer'],

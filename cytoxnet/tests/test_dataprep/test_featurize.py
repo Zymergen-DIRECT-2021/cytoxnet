@@ -37,6 +37,6 @@ def test_add_features():
 
     assert 'CircularFingerprint' in df_2.columns, 'Correct default\
         feature column not created'
-    assert len(df_2['CircularFingerprint'][1][0]) == 2048, 'Wrong default\
+    assert len(df_2['CircularFingerprint'][1]) == 2048, 'Wrong default\
         fingerprint length'
     return

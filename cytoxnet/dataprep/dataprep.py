@@ -49,14 +49,37 @@ def convert_to_categorical(dataframe, cols=None):
     return dataframe
 
 def handle_sparsity(dataframe,
-                    y_col: Union[str, List[str]],
+                    y_col: List[str],
                     weight_col: str = 'w'):
     """Prepares sparse data to be learned.
     
     Replace nans with 0.0 in the dataset so that it can be input to a model,
     and create a weight matrix with all nan values as 0.0 weight so that they
     do not introduce bias.
+    
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe with sparse targets.
+    y_col : list of str
+        The names of all columns containing the targets.
+    weight_col : str
+        The name of column to be appended to the dataframe with target weight
+        arrays.
+        
+    Returns
+    -------
+    pd.DataFrame with sparsity handled
     """
+    # compute weights based on presence of nan
+    dataframe[weight_col] = list(np.float64(
+        ~dataframe[y_col].isnull().values
+        )
+    )
+    # It does not matter what value we replace the nans with as the weight is
+    # 0, but it has to be numeric to not break the models
+    dataframe = dataframe.fillna(0)
+    return dataframe
 
 def convert_to_dataset(dataframe,
                        X_col: str = 'X',
@@ -93,6 +116,8 @@ def convert_to_dataset(dataframe,
 
     # define y
     y = dataframe[y_col].values
+    if len(y.shape) == 1:
+        y = y.reshape(-1, 1)
 
     # define weight
     if w_col is not None:

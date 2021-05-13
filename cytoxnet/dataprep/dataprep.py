@@ -1,3 +1,5 @@
+from typing import Union, List
+
 import deepchem as dc
 import numpy as np
 import pandas as pd

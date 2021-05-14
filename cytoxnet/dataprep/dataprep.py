@@ -1,3 +1,5 @@
+from typing import Union, List
+
 import deepchem as dc
 import numpy as np
 import pandas as pd
@@ -46,6 +48,15 @@ def convert_to_categorical(dataframe, cols=None):
 
     return dataframe
 
+def handle_sparsity(dataframe,
+                    y_col: Union[str, List[str]],
+                    weight_col: str = 'w'):
+    """Prepares sparse data to be learned.
+    
+    Replace nans with 0.0 in the dataset so that it can be input to a model,
+    and create a weight matrix with all nan values as 0.0 weight so that they
+    do not introduce bias.
+    """
 
 def convert_to_dataset(dataframe,
                        X_col: str = 'X',
@@ -68,18 +79,24 @@ def convert_to_dataset(dataframe,
     - dataset: deepchem dataset object
     """
     # define x
-    X = dataframe[X_col].values
-    if isinstance(X[0][0], np.ndarray):
-        X = np.stack(X).reshape(len(dataframe), -1)
-    else:
-        X = np.stack(X).reshape(len(dataframe))
+    if type(X_col) == str:
+        X_col = [X_col]
+    X_list = []
+    for col in X_col:
+        X_ = dataframe[col].values
+        X_ = np.vstack(X_)
+        X_list.append(X_)
+    X = np.hstack(X_list)
+    # need to check for object features
+    if not np.issubdtype(X.dtype, np.number):
+        X = X.reshape(-1)
 
     # define y
     y = dataframe[y_col].values
 
     # define weight
     if w_col is not None:
-        w = dataframe[w_col].values
+        w = np.vstack(dataframe[w_col].values)
     else:
         w = None
 
@@ -93,7 +110,6 @@ def convert_to_dataset(dataframe,
     dataset = dc.data.NumpyDataset(X, y, w, ids)
 
     return dataset
-
 
 def data_transformation(dataset,
                         transformations: list = ['NormalizationTransformer'],

@@ -12,6 +12,7 @@ from typing import Type
 
 import altair as alt
 import deepchem.data
+import numpy as np
 import pandas
 
 Dataset = Type[deepchem.data.Dataset]
@@ -58,8 +59,7 @@ def pair_predict(model: object,
     else:
         task = model.tasks[0]
     # make predictions - a numpy array
-    predictions = model.predict(dataset, untransform=untransform)
-    predictions = predictions.reshape(-1, len(model.tasks))
+    predictions = np.vstack(model.predict(dataset, untransform=untransform))
     print(predictions.shape)
     if untransform:
         assert hasattr(model, 'transformers'),\
@@ -69,7 +69,7 @@ def pair_predict(model: object,
             y = trans.untransform(y)
     else:
         y = dataset.y
-
+    y = np.vstack(y)
     assert predictions.shape == y.shape,\
         "predictions and true values should have the same shape."
     assert y.shape[-1] == len(model.tasks),\

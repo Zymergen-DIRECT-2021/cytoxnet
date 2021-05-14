@@ -50,7 +50,7 @@ def convert_to_categorical(dataframe, cols=None):
 
 def handle_sparsity(dataframe,
                     y_col: List[str],
-                    weight_col: str = 'w'):
+                    w_label: str = 'w'):
     """Prepares sparse data to be learned.
     
     Replace nans with 0.0 in the dataset so that it can be input to a model,
@@ -63,18 +63,18 @@ def handle_sparsity(dataframe,
         The dataframe with sparse targets.
     y_col : list of str
         The names of all columns containing the targets.
-    weight_col : str
-        The name of column to be appended to the dataframe with target weight
-        arrays.
+    w_label : str
+        The string to add to the target names to create columns of weights in
+        the dataframe.
         
     Returns
     -------
     pd.DataFrame with sparsity handled
     """
+    w_names = [w_label+'_'+target for target in y_col]
     # compute weights based on presence of nan
-    dataframe[weight_col] = list(np.float64(
+    dataframe[w_names] = np.float64(
         ~dataframe[y_col].isnull().values
-        )
     )
     # It does not matter what value we replace the nans with as the weight is
     # 0, but it has to be numeric to not break the models
@@ -85,6 +85,7 @@ def convert_to_dataset(dataframe,
                        X_col: str = 'X',
                        y_col: str = 'y',
                        w_col: str = None,
+                       w_label: str = None,
                        id_col: str = None):
     """
     Converts dataframe into a deepchem dataset object.
@@ -95,6 +96,9 @@ def convert_to_dataset(dataframe,
     - X_col: (str or List[str]) name(s) of the column(s) containing the X array.
     - y_col: (str or List[str]) name(s) of the column(s) containing the y array.
     - w_col: (str or List[str]) name(s) of the column(s) containing the w array.
+    - w_label: str of the preceding label of target weight columns.
+        ex. if the target is 'LD50' and the w_label is 'w' the datafame must
+        contain a column of 'w_LD50'.
     - id_col: (str) name of the column containing the ids.
 
     Returns
@@ -115,12 +119,17 @@ def convert_to_dataset(dataframe,
         X = X.reshape(-1)
 
     # define y
+    if type(y_col) == str:
+        y_col = [y_col]
     y = dataframe[y_col].values
     if len(y.shape) == 1:
         y = y.reshape(-1, 1)
 
     # define weight
     if w_col is not None:
+        w = np.vstack(dataframe[w_col].values)
+    elif w_label is not None:
+        w_col = [w_label+'_'+target for target in y_col]
         w = np.vstack(dataframe[w_col].values)
     else:
         w = None

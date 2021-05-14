@@ -76,7 +76,7 @@ def load_data(csv_file,
     return df
 
 
-def load_chembl_ecoli():
+def load_chembl_ecoli(**kwargs):
     # get the path in the package
     path = pkg_resources.resource_stream(
         __name__, '../data/chembl_ecoli_MIC.csv'
@@ -84,18 +84,19 @@ def load_chembl_ecoli():
     df = load_data(path,
                    cols=['smiles', 'MIC'],
                    id_cols=['smiles'],
-                   nans="drop")
+                   nans="drop",
+                   **kwargs)
     return df
 
 
-def load_zhu_rat():
+def load_zhu_rat(**kwargs):
     path = pkg_resources.resource_stream(
         __name__, '../data/zhu_rat_LD50.csv'
     )
     df = load_data(path,
                    cols=['smiles', 'LD50'],
                    id_cols=['smiles'],
-                   nans='drop')
+                   nans='drop', **kwargs)
     return df
 
 

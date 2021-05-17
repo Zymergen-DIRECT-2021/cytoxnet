@@ -79,3 +79,13 @@ for transfer learning.
     - *Evaluates overlap of datasets. *
     - __User__: Provides two datasets with uniform featurization.
     - __Returns__: Metrics and Visuals
+
+10. <span style="color:blue">Manage resource pool</span>
+    - *Produce and update a pool of sparse data to use for augmentation.*
+    - __User__: Provides datasets or specifies package data, and features to use.
+    - __Returns__: None, resource pool is updated.
+
+11. <span style="color:blue">Augment dataset</span>
+    - *Augment a small user dataset with data from the resource pool.*
+    - __User__: Provides a dataset of compounds and desired targets.
+    - __Returns__: Dataset with new targets and compounds added.

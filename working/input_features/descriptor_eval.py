@@ -18,5 +18,5 @@ def evaluate_descriptors(dataname, descriptors_name, target, **kwargs):
                                 target=target,
                                 save_fig=False,
                                 **kwargs)
-    print(trained_model.coef_)
+    print(repr(trained_model.model.model.coef_))
     return 

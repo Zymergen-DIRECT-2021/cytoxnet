@@ -76,6 +76,10 @@ _MODELS = {
         "(sklearn) Least Absolute Shrinkage and Selection Operator. Accepts\
  vector features",
         "sklearn.linear_model.Lasso"
+    ),
+    "RFR": (
+        "(sklearn) Random Forest Regressor. Accepts vector features.",
+        "sklearn.ensemble.RandomForestRegressor",
     )
 }
 

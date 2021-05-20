@@ -67,7 +67,7 @@ def add_features(dataframe,
 
     """
     # Check that set contains Mol objects
-    assert isinstance(dataframe['Mol'][0], rdkit.Chem.Mol),\
+    assert isinstance(dataframe[MolcolumnID].values[0], rdkit.Chem.Mol),\
         'Mol column does not contain Mol object'
     featurizer = getattr(dc.feat, method)(**kwargs)
     f_list = []

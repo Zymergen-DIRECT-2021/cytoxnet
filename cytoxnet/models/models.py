@@ -38,8 +38,8 @@ Gaussian process regression (GPR).
 >>>type(mymodel.model)
 sklearn.gaussian_process._gpr.GaussianProcessRegressor
 """
-# deepchem sklearn model wrapper might be helpful
 
+import importlib
 from typing import Type, Union, List
 
 import altair as alt
@@ -79,7 +79,7 @@ _MODELS = {
     ),
     "RFR": (
         "(sklearn) Random Forest Regressor. Accepts vector features.",
-        "sklearn.ensemble.RandomForestRegressor",
+        "sklearn.ensemble.RandomForestRegressor"
     )
 }
 
@@ -246,19 +246,15 @@ for the task: {}'.format(model.mode)
         # >importlib all module in package with `list`
         # maybe string.split('.') will do it
         # get package and subpackage names
+        print(model_type)
         components = model_type.split('.')
+        print(components)
+        print('looping')
         # import package
-        mod = __import__(components[0])
+        mod = importlib.import_module('.'.join(components[:-1]))
         # import subpackages
-        for i, comp in enumerate(components[1:]):
-            if not hasattr(mod, comp):
-                raise AttributeError(
-                    'The module {} does not contain the attribute {}'.format(
-                        components[:i], comp
-                    )
-                )
-            mod = getattr(mod, comp)
-        return mod
+        Model = getattr(mod, components[-1])
+        return Model
 
     def help(model_name: str = None):
         """Get list of available model classes, or help on specific one.

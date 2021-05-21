@@ -246,10 +246,7 @@ for the task: {}'.format(model.mode)
         # >importlib all module in package with `list`
         # maybe string.split('.') will do it
         # get package and subpackage names
-        print(model_type)
         components = model_type.split('.')
-        print(components)
-        print('looping')
         # import package
         mod = importlib.import_module('.'.join(components[:-1]))
         # import subpackages

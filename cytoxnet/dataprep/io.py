@@ -190,7 +190,6 @@ def add_datasets(dataframes,
     for i, df in enumerate(dataframes_):
         
         # canonicalize
-        df = ft.molstr_to_Mol(df, strcolumnID=id_col)
         df[id_col] = df[id_col].apply(lambda x: dp.canonicalize_smiles(x))
         df.dropna(subset=[id_col], inplace=True)
         # first extract the molecules that already exist in the codex
@@ -199,17 +198,15 @@ def add_datasets(dataframes,
         # want to one set
         uniques = pd.DataFrame(df[
             ~df[id_col].isin(common)
-        ][[id_col, 'Mol']])
+        ][[id_col]])
         uniques.drop_duplicates(subset = [id_col], inplace=True)
         # compute the features already in the codex for these unique values
         for col_name in master.columns:
             if col_name != id_col:
                 uniques = ft.add_features(uniques,
-                                          MolcolumnID='Mol',
+                                          id_col=id_col,
                                           method=col_name,
                                           **kwargs)
-        uniques.drop(columns=['Mol'], inplace=True)
-        df.drop(columns=['Mol'], inplace=True)
         # add these new values to the codex
         master = pd.concat([master, uniques], ignore_index=True)
         # get the foreign key for the data
@@ -225,12 +222,10 @@ def add_datasets(dataframes,
             new_featurizers = [new_featurizers]
         assert all([type(f) == str for f in new_featurizers]),\
             "new_featurizers should be a list of featurizers to use"
-        master = ft.molstr_to_Mol(master, strcolumnID='smiles')
         for f in new_featurizers:
             master = ft.add_features(master,
-                                     MolcolumnID='Mol',
+                                     id_col=id_col,
                                      method=f)
-        master.drop(columns=['Mol'], inplace=True)
         
     master.to_csv(db_path+'/compounds.csv')
     return

@@ -1,4 +1,4 @@
-,species,smiles,MIC,units,censoring,molecular_weight,assay_parameters,source,source_journal
+,species,smiles,ecoli_MIC,units,censoring,molecular_weight,assay_parameters,source,source_journal
 0,Escherichia coli,C[C@@](CCN1Cc2cc(C#CC#CCOC(=O)N3CCC(O)CC3)cn2C1=O)(C(=O)NO)S(C)(=O)=O,-0.6931471805599453,log(ug/mL),'=',520.56,,Scientific Literature,J Med Chem
 1,Escherichia coli,CO[C@]1(C)C[C@H](O[C@H]2[C@H](C)[C@@H](O[C@@H]3O[C@H](C)C[C@H](N(C)C)[C@H]3O)[C@](C)(OC)C[C@@H](C)[C@H](O)[C@H](C)CN(C)C[C@H](Cn3cc(-c4ccccc4)nn3)OC(=O)[C@@H]2C)O[C@@H](C)[C@@H]1O,3.4657359027997265,log(ug/mL),'=',862.12,,Scientific Literature,Eur J Med Chem
 2,Escherichia coli,CO[C@]1(C)C[C@H](O[C@H]2[C@H](C)[C@@H](O[C@@H]3O[C@H](C)C[C@H](N(C)C)[C@H]3O)[C@](C)(OC)C[C@@H](C)[C@H](O)[C@H](C)CN(C)C[C@H](COCc3cn(-c4ccc(OC(F)(F)F)cc4)nn3)OC(=O)[C@@H]2C)O[C@@H](C)[C@@H]1O,4.1588830833596715,log(ug/mL),'=',976.14,,Scientific Literature,Eur J Med Chem

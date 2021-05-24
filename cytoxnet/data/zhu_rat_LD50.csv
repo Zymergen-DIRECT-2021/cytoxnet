@@ -1,4 +1,4 @@
-,compound_name,species,smiles,LD50,units,source
+,compound_name,species,smiles,rat_LD50,units,source
 0,"Diazene, diphenyl-, 1-oxide",Rat,[O-][N+](=Nc1ccccc1)c1ccccc1,-2.505,log(mol/kg),https://doi.org/10.1021/tx900189p
 1,"Methane, tribromo-",Rat,BrC(Br)Br,-2.343,log(mol/kg),https://doi.org/10.1021/tx900189p
 2,Bromoethene (9CI),Rat,C=CBr,-2.33,log(mol/kg),https://doi.org/10.1021/tx900189p

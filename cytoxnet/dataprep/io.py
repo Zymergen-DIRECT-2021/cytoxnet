@@ -102,7 +102,25 @@ def create_compound_codex(db_path = './database',
                           id_col='smiles',
                           featurizers=None,
                           **kwargs):
+    """
+    Create a compound codex for a combined database.
+    
+    Creates a master csv file that tracks the unique canonicalized smiles of
+    all data in the database, and stores deatures for those data.
+    
+    Parameters
+    ----------
+    db_path : str
+        The path to the folder to contain database files. Will create direcory
+        if it does not exist.
+    id_col : str
+        The column in all dataframes representing the compound id.
+    featurizers : str or list of str
+        The featurizer/s to initialize the compounds codex with.
+    """
     if featurizers is not None:
+        if type(featurizers) != list:
+            featurizers = [featurizers]
         assert all([hasattr(dc.feat, f) for f in featurizers]),\
             "featurizer should be a list of valid featurizers to use"
         master = pd.DataFrame(columns=[id_col, *featurizers])
@@ -119,6 +137,23 @@ def add_datasets(dataframes,
                  db_path = './database',
                  new_featurizers=None,
                  **kwargs):
+    """Add a new set of data to the tracked database.
+    
+    Update the compounds csv with new dataset/s canonicalized, and saves
+    csvs to the database folder with foreign keys tracked.
+    
+    Parameters
+    ----------
+    dataframes : dataframe or string or list of them
+        The datasets to add. If it is a string object, we will attempt to load
+        the file at the string path or a file in the package data.
+    id_col : str
+        The column in all dataframes representing the compound id
+    db_path : str
+        The path to the folder containing database files.
+    new_featurizers : str or list of str, default None
+        Featurizer names to apply to the new data as well as all current data.
+    """
     # get data from package if it is not already in dataframe form
     if type(dataframes) != list:
         dataframes = [dataframes]

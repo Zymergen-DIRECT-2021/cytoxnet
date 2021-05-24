@@ -4,6 +4,8 @@ import deepchem as dc
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
+import rdkit.Chem
+
 
 def convert_to_categorical(dataframe, cols=None):
     """
@@ -47,6 +49,33 @@ def convert_to_categorical(dataframe, cols=None):
         pass
 
     return dataframe
+
+def canonicalize_smiles(smiles, raise_error=False):
+    """Canonicalize a smiles string.
+    
+    Parameters
+    ----------
+    smiles : str
+    
+    rais_error : bool
+        If canonicalizing fails whether to raise the error or simply return nan
+    
+    Returns
+    -------
+    csmiles : str
+        Canonicalized smiles string.
+    """
+    try:
+        assert type(smiles) == str,\
+            f"smiles must be a string, not {type(smiles)}"
+        mol = rdkit.Chem.MolFromSmiles(smiles)
+        csmiles = rdkit.Chem.MolToSmiles(mol)
+    except:
+        if raise_error:
+            raise
+        else:
+            csmiles = None
+    return csmiles
 
 def handle_sparsity(dataframe,
                     y_col: List[str],

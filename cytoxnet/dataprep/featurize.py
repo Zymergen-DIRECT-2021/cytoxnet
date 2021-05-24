@@ -107,11 +107,8 @@ def add_features(dataframe,
         overlap = dataframe.merge(
             compounds, how='inner', on=[id_col]
         ).set_index('ind', drop=True)
-        print(dataframe)
-        print(overlap)
         dataframe[method] = overlap[method]
         dataframe.drop(columns=['ind'], inplace=True)
-        print('DF with grapped features: ', dataframe)
     else:
         dataframe[method] = None
         
@@ -122,9 +119,7 @@ def add_features(dataframe,
     featurizer = getattr(dc.feat, method)(**kwargs)
     f = list(featurizer.featurize(dataframe_['Mol'].values))
     dataframe_[method] = f
-    print('DF with computed feats: ', dataframe_)
     dataframe.loc[dataframe_.index, method] = dataframe_[method]
-    print('DF with all features: ', dataframe)
     return dataframe
 
 

@@ -58,7 +58,8 @@ def add_features(dataframe,
                  id_col='smiles',
                  method='CircularFingerprint',
                  codex=None,
-                 canonicalize=False,
+                 canonicalize=True,
+                 drop_na=True,
                  **kwargs):
     """
     Featurizes a set of Mol objects using the desired feturization method.
@@ -82,6 +83,8 @@ def add_features(dataframe,
         path to the codex containing smiles and features
     canonicalize : bool
         Whether or not to first canonicalize the id_column
+    drop_na : bool
+        Whether to drop nas of post featurization data
 
     Returns
     -------
@@ -120,6 +123,10 @@ def add_features(dataframe,
     f = list(featurizer.featurize(dataframe_['Mol'].values))
     dataframe_[method] = f
     dataframe.loc[dataframe_.index, method] = dataframe_[method]
+    
+    # drop na
+    if drop_na:
+        dataframe.dropna(subset=[method], inplace=True)
     return dataframe
 
 

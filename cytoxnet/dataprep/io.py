@@ -12,6 +12,7 @@ import cytoxnet.dataprep.featurize as ft
 import cytoxnet.dataprep.dataprep as dp
 import cytoxnet.data as data
 
+np.set_printoptions(threshold=np.inf)
 
 def load_data(file,
               cols=None,
@@ -226,6 +227,5 @@ def add_datasets(dataframes,
             master = ft.add_features(master,
                                      id_col=id_col,
                                      method=f)
-        
     master.to_csv(db_path+'/compounds.csv')
     return

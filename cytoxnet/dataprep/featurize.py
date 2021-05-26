@@ -55,7 +55,7 @@ def from_np_array(array_string):
         array_string = ','.join(array_string.split())
         out = np.array(ast.literal_eval(array_string))
     except:
-        out = array_string
+        out = None
     return out
 
 def add_features(dataframe,

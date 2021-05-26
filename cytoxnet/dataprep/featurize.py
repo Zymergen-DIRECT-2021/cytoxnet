@@ -48,11 +48,15 @@ def molstr_to_Mol(dataframe, id_col='InChI String'):
 def from_np_array(array_string):
     """Convert a string to numpy array.
     
-    Used for loading string arrays in pandas dataframes
+    Used for loading string arrays in pandas dataframes.
     """
-    array_string = re.sub('\[\s*', '[', array_string)
-    array_string = ','.join(array_string.split())
-    return np.array(ast.literal_eval(array_string))
+    try:
+        array_string = re.sub('\[\s*', '[', array_string)
+        array_string = ','.join(array_string.split())
+        out = np.array(ast.literal_eval(array_string))
+    except:
+        out = array_string
+    return out
 
 def add_features(dataframe,
                  id_col='smiles',

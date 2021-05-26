@@ -13,7 +13,7 @@ import cytoxnet.dataprep.io
 # typing
 DataFrame = Type[pd.core.frame.DataFrame]
 
-def evaluate_crossval(datafile: Union[str],
+def evaluate_crossval(datafile: Union[str, DataFrame],
                       ml_model: str,
                       feat_method: str,
                       target: Union[str, List[str]],
@@ -97,12 +97,12 @@ def evaluate_crossval(datafile: Union[str],
            'MSE': metrics[1]}
     return out
 
-def grid_evaluate_crossval(datafiles,
-                           ml_models,
-                           feat_methods,
-                           targets_codex,
-                           k=5,
-                           parallel=True,
+def grid_evaluate_crossval(datafiles: List[Union[str, DataFrame]],
+                           ml_models: List[str],
+                           feat_methods: List[str],
+                           targets_codex: dict,
+                           k: int = 5,
+                           parallel: bool = True,
                            **kwargs):
     """Cross validated metrics for a grid of models, datasets, and feats.
     

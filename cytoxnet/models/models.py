@@ -80,6 +80,10 @@ _MODELS = {
     "RFR": (
         "(sklearn) Random Forest Regressor. Accepts vector features.",
         "sklearn.ensemble.RandomForestRegressor"
+    ),
+    "RFC": (
+        "(sklearn) Random Forest Classifier. Accepts vector features.",
+        "sklearn.ensemble.RandomForestClassifier"
     )
 }
 

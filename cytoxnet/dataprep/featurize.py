@@ -131,17 +131,11 @@ def add_features(dataframe,
     
     # drop na
     if drop_na:
+        # raw nans
         dataframe.dropna(subset=[method], inplace=True)
+        # nans within the arrays
+        featarray = np.vstack(dataframe[method].values)
+        naninds = np.unique(np.where(np.isnan(featarray))[0])
+        dataframe.drop(index=dataframe.index[naninds], inplace=True)
     return dataframe
 
-
-def get_descriptors(dataframe, descriptor_type):
-    """
-    Extracts molecular descriptors and adds them to a new column
-    Something to look into in the future
-    What descriptors might we want? how can we get them?
-    will need a featurizing function that can take any descriptors we
-    extract here
-    """
-    # dataframe[descriptor_type] = descriptorx_list
-    return dataframe

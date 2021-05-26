@@ -31,6 +31,16 @@ def test_molstr_to_Mol():
         rdkit Mol objects'
     return
 
+def test_from_np_array():
+    """Converting saved strings to arrays.
+    """
+    string = "[ 1.0 2.0 3.0 ]"
+    subject = featurize.from_np_array(string)
+    assert np.array_equal(subject, np.array([1,2,3]))
+    bad_string = "abcd"
+    subject = featurize.from_np_array(bad_string)
+    assert subject is None
+    return
 
 def test_add_features():
     """Creating features from smiles string."""

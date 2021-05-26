@@ -62,7 +62,6 @@ def evaluate_crossval(datafile: Union[str, DataFrame],
         dataframe,
         method=feat_method,
         codex=codex)
-
     # convert to dataset
     dataset = cytoxnet.dataprep.dataprep.convert_to_dataset(
         df_wfeat,

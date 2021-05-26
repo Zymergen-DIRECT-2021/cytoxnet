@@ -107,15 +107,16 @@ def add_features(dataframe,
         compounds = pd.read_csv(
             codex, index_col=0, converters={method: from_np_array}
         )
-        assert method in compounds.columns,\
-            "The desired featurization method is not in the codex."
-        # determine which ids are in the codex
-        dataframe['ind'] = dataframe.index
-        overlap = dataframe.merge(
-            compounds, how='inner', on=[id_col]
-        ).set_index('ind', drop=True)
-        dataframe[method] = overlap[method]
-        dataframe.drop(columns=['ind'], inplace=True)
+        if method in compounds.columns:
+            # determine which ids are in the codex
+            dataframe['ind'] = dataframe.index
+            overlap = dataframe.merge(
+                compounds, how='inner', on=[id_col]
+            ).set_index('ind', drop=True)
+            dataframe[method] = overlap[method]
+            dataframe.drop(columns=['ind'], inplace=True)
+        else:
+            dataframe[method] = None
     else:
         dataframe[method] = None
         

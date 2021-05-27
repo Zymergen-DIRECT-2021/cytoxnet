@@ -50,6 +50,63 @@ def convert_to_categorical(dataframe, cols=None):
 
     return dataframe
 
+def binarize_targets(dataframe,
+                     target_cols: Union[str, List[str]],
+                     high_positive: bool = False, 
+                     percentile: float = 0.5,
+                     value: Union[float, List[float]] = None):
+    """Binarize target columns for classification.
+    
+    For targets of continuous variables, binarize based on a position in the
+    distribution.
+    
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataset with target columns.
+    target_cols : str or list of str
+        The column names to binarize.
+    high_positive : bool
+        If the end of the distribution higher than the chosen position should
+        considered a posative target. eg. if True: posatives labeled for data
+        > the postition
+    percentile : float, default = 0.5 (median)
+        The relative position in the distribution to consider for the two
+        classes
+    value : float, default None
+        Specific value(s) to use as the cutoff for classes instead of percent.
+        
+    Example
+    -------
+    For target column of [ 0.0, 2.5, 5.0, 7.5, 10.0 ] with mean 5.0
+    position = 0.75, high posative = True
+    75% of the min max range is labeled as negative:
+    labels = [ False, False, False, False, True ]
+    """
+    assert type(dataframe) == pd.core.frame.DataFrame,\
+        'dataframe should be dataframe'
+    if type(target_cols) != list:
+        target_cols = [target_cols]
+    assert all([col in dataframe.columns for col in target_cols]),\
+        'Not all columns are in the dataframe'
+    assert all([dtype == float for dtype in dataframe[target_cols]].dtypes),\
+        'Target columns should have float data types'
+    subset = dataframe[target_cols]
+    # the user wants to specify specific values
+    if value is not None:
+        if type(value) == float:
+            pass
+        else:
+            value = np.array(value)
+            assert len(value) == len(target_cols),\
+                "Multiple values were specified for class cutoff but do not\
+ match the number of target columns."
+    else:
+        value = subset.quantile(percentile).values
+    
+    # now mask the targets
+    
+
 def canonicalize_smiles(smiles, raise_error=False):
     """Canonicalize a smiles string.
     

@@ -135,7 +135,10 @@ def add_features(dataframe,
         dataframe.dropna(subset=[method], inplace=True)
         # nans within the arrays
         featarray = np.vstack(dataframe[method].values)
-        naninds = np.unique(np.where(np.isnan(featarray))[0])
-        dataframe.drop(index=dataframe.index[naninds], inplace=True)
+        if featarray.dtype == np.object:
+            pass
+        else:
+            naninds = np.unique(np.where(np.isnan(featarray))[0])
+            dataframe.drop(index=dataframe.index[naninds], inplace=True)
     return dataframe
 

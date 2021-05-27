@@ -2,11 +2,8 @@
 Tests for dataprep.py
 """
 
-import os
 
 from cytoxnet.dataprep import dataprep
-from cytoxnet.dataprep import io
-from cytoxnet.dataprep import featurize
 import math
 import deepchem as dc
 import numpy as np
@@ -21,18 +18,19 @@ def sample_data():
     """
 
     df = pd.DataFrame({'smiles': ['C', 'O'],
-                       'target': [1.0,2.0],
-                       'target2': [3.0,4.0],
+                       'target': [1.0, 2.0],
+                       'target2': [3.0, 4.0],
                        'target3': [None, 1.0],
-                       'cf': [np.array([1,2]),
-                              np.array([3,4])],
+                       'cf': [np.array([1, 2]),
+                              np.array([3, 4])],
                        'w': [.5, .75]})
     return df
+
 
 def test_binarize_targets(sample_data):
     """Converting column to binary target."""
     df = sample_data
-    
+
     # first try specified percentile
     subject = dataprep.binarize_targets(
         df,
@@ -51,7 +49,7 @@ def test_binarize_targets(sample_data):
     )
     assert np.array_equal(subject['target'].values,
                           np.array([True, False]))
-    
+
     # specify a value and multiple columns
     subject = dataprep.binarize_targets(
         df,
@@ -73,6 +71,7 @@ def test_binarize_targets(sample_data):
                                     [True, True]]))
     return
 
+
 def test_canonicalize_smiles():
     """Valid smiles should be canonicalized."""
     assert dataprep.canonicalize_smiles('C') == 'C',\
@@ -80,6 +79,7 @@ def test_canonicalize_smiles():
     assert dataprep.canonicalize_smiles('OC') == 'CO',\
         "Canonicalization failed"
     return
+
 
 def test_handle_sparsity(sample_data):
     """Sparse datapoints should be weighted zero."""
@@ -98,6 +98,7 @@ def test_handle_sparsity(sample_data):
         "sparse target was not unweighted."
     return
 
+
 def test_convert_to_dataset(sample_data):
     """
     Test convert_to_dataset function
@@ -114,10 +115,10 @@ def test_convert_to_dataset(sample_data):
 
     assert isinstance(dataset, dc.data.datasets.NumpyDataset), 'Dataset is not\
         deepchem NumpyDataset object'
-    assert dataset.X.shape == (2,2)
-    assert dataset.y.shape == (2,1)
+    assert dataset.X.shape == (2, 2)
+    assert dataset.y.shape == (2, 1)
     assert np.array_equal(dataset.w, np.array([[1.0], [1.0]]))
-    
+
     # try specifyin a weight column
     dataset = dataprep.convert_to_dataset(
         dataframe=df,
@@ -126,7 +127,7 @@ def test_convert_to_dataset(sample_data):
         w_col='w'
     )
     assert np.array_equal(dataset.w, np.array([[.5], [.75]]))
-    
+
     # and a wieght prefix
     df = dataprep.handle_sparsity(
         df,
@@ -141,6 +142,7 @@ def test_convert_to_dataset(sample_data):
     )
     assert np.array_equal(dataset.w, np.array([[0.], [1.0]]))
     return
+
 
 def test_data_transformation(sample_data):
     """
@@ -162,13 +164,14 @@ def test_data_transformation(sample_data):
     # by Min-Max Transformer
     transformed_data, transformer_list = dataprep.data_transformation(
         dataset=dataset, transformations=[
-            'NormalizationTransformer', 'MinMaxTransformer'], to_transform=['X'])
+            'NormalizationTransformer', 'MinMaxTransformer'
+        ], to_transform=['X'])
 
     assert all(
         [isinstance(
             transformer, dc.trans.transformers.Transformer
-         ) for transformer in transformer_list]), 'Transformers not returned.'
-    
+        ) for transformer in transformer_list]), 'Transformers not returned.'
+
     return
 
 
@@ -197,10 +200,15 @@ def test_data_splitting(sample_data):
 
     # split data using train-test split
     train, test = dataprep.data_splitting(
-        dataset=dataset, splitter='RandomSplitter', split_type='train_test_split', frac_train=0.5)
+        dataset=dataset,
+        splitter='RandomSplitter',
+        split_type='train_test_split',
+        frac_train=0.5
+    )
 
     assert np.shape(split) == (2, 2), 'k_fold_split is\
        wrong shape'
-    assert math.isclose(0.5, len(train)/(len(test)+len(train)), rel_tol=0.05), 'Train-Test split has\
-       incorrect proportions'
+    assert math.isclose(0.5, len(
+        train) / (len(test) + len(train)), rel_tol=0.05), 'Train-Test split\
+ has incorrect proportions'
     return

@@ -2,7 +2,6 @@
 Input/Output module for loading data and generating output files.
 """
 import os
-import pkg_resources
 
 import numpy as np
 import pandas as pd
@@ -13,6 +12,7 @@ import cytoxnet.dataprep.dataprep as dp
 import cytoxnet.data as data
 
 np.set_printoptions(threshold=np.inf)
+
 
 def load_data(file,
               cols=None,
@@ -52,11 +52,11 @@ def load_data(file,
         # or is in the package data
         else:
             file_ = None
-            package_data_location =  data.__path__._path[0]
+            package_data_location = data.__path__._path[0]
             data_files = os.listdir(package_data_location)
             for f in data_files:
                 if file == f.split('.')[0]:
-                    file_ = package_data_location+'/'+f
+                    file_ = package_data_location + '/' + f
                     break
             if file_ is None:
                 raise FileNotFoundError(
@@ -65,7 +65,7 @@ def load_data(file,
                 )
             else:
                 file = file_
-        
+
     # run any more checks specific to the data that we may want to add
     # load a csv file into a dataframe
     df = pd.read_csv(file, index_col=0)
@@ -99,16 +99,16 @@ def load_data(file,
     return df
 
 
-def create_compound_codex(db_path = './database',
+def create_compound_codex(db_path='./database',
                           id_col='smiles',
                           featurizers=None,
                           **kwargs):
     """
     Create a compound codex for a combined database.
-    
+
     Creates a master csv file that tracks the unique canonicalized smiles of
     all data in the database, and stores deatures for those data.
-    
+
     Parameters
     ----------
     db_path : str
@@ -120,7 +120,7 @@ def create_compound_codex(db_path = './database',
         The featurizer/s to initialize the compounds codex with.
     """
     if featurizers is not None:
-        if type(featurizers) != list:
+        if not isinstance(featurizers, list):
             featurizers = [featurizers]
         assert all([hasattr(dc.feat, f) for f in featurizers]),\
             "featurizer should be a list of valid featurizers to use"
@@ -129,20 +129,21 @@ def create_compound_codex(db_path = './database',
         master = pd.DataFrame(columns=[id_col])
     if not os.path.exists(db_path):
         os.makedirs(db_path)
-    master.to_csv(db_path+'/compounds.csv')
+    master.to_csv(db_path + '/compounds.csv')
     return
+
 
 def add_datasets(dataframes,
                  names,
                  id_col='smiles',
-                 db_path = './database',
+                 db_path='./database',
                  new_featurizers=None,
                  **kwargs):
     """Add a new set of data to the tracked database.
-    
+
     Update the compounds csv with new dataset/s canonicalized, and saves
     csvs to the database folder with foreign keys tracked.
-    
+
     Parameters
     ----------
     dataframes : dataframe or string or list of them
@@ -156,22 +157,22 @@ def add_datasets(dataframes,
         Featurizer names to apply to the new data as well as all current data.
     """
     # get data from package if it is not already in dataframe form
-    if type(dataframes) != list:
+    if not isinstance(dataframes, list):
         dataframes = [dataframes]
-    if type(names) != list:
+    if not isinstance(names, list):
         names = [names]
     assert len(names) == len(dataframes),\
         'names should be the names of the datasets passed, with the same len'
 
     dataframes_ = []
     for df in dataframes:
-        if type(df) == pd.core.frame.DataFrame:
+        if isinstance(df, pd.core.frame.DataFrame):
             dataframes_.append(df.copy())
-        elif type(df) == str:
+        elif isinstance(df, str):
             try:
                 loaded_df = load_data(df)
                 dataframes_.append(loaded_df)
-            except:
+            except BaseException:
                 raise ValueError(
                     f'One of the dataframes passed ({df}) was a string, but\
  does not correspond to a file or package dataset.'
@@ -183,25 +184,25 @@ def add_datasets(dataframes,
         assert id_col in dataframes_[-1].columns,\
             f'Cannot add a dataset that does not have the id_col={id_col}\
  column'
-    
-    master = pd.read_csv(db_path+'/compounds.csv', index_col=0)
+
+    master = pd.read_csv(db_path + '/compounds.csv', index_col=0)
     assert id_col in master.columns, f'The master data file should have the\
  column id_col=`{id_col}`'
-    
+
     dfs_out = []
     for i, df in enumerate(dataframes_):
-        
+
         # canonicalize
         df[id_col] = df[id_col].apply(lambda x: dp.canonicalize_smiles(x))
         df.dropna(subset=[id_col], inplace=True)
         # first extract the molecules that already exist in the codex
         common = df.merge(master, on=id_col)[id_col]
-        # and now the ones that do not - the data may have duplicates and we only
-        # want to one set
+        # and now the ones that do not - the data may have duplicates and we
+        # only want to one set
         uniques = pd.DataFrame(df[
             ~df[id_col].isin(common)
         ][[id_col]])
-        uniques.drop_duplicates(subset = [id_col], inplace=True)
+        uniques.drop_duplicates(subset=[id_col], inplace=True)
         # compute the features already in the codex for these unique values
         for col_name in master.columns:
             if col_name != id_col:
@@ -218,17 +219,17 @@ def add_datasets(dataframes,
             fkeys.append(fkey)
         df['foreign_key'] = fkeys
         dfs_out.append(df)
-        df.to_csv(db_path+'/'+names[i]+'.csv')
-    
+        df.to_csv(db_path + '/' + names[i] + '.csv')
+
     if new_featurizers is not None:
-        if type(new_featurizers) != list:
+        if not isinstance(new_featurizers, list):
             new_featurizers = [new_featurizers]
-        assert all([type(f) == str for f in new_featurizers]),\
+        assert all([isinstance(f, str) for f in new_featurizers]),\
             "new_featurizers should be a list of featurizers to use"
         for f in new_featurizers:
             master = ft.add_features(master,
                                      id_col=id_col,
                                      method=f)
-    master.to_csv(db_path+'/compounds.csv')
+    master.to_csv(db_path + '/compounds.csv')
     cleaned_db_frames = dict(zip(names, dfs_out))
     return cleaned_db_frames

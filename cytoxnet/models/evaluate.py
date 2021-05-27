@@ -13,6 +13,7 @@ import cytoxnet.dataprep.io
 # typing
 DataFrame = Type[pd.core.frame.DataFrame]
 
+
 def evaluate_crossval(datafile: Union[str, DataFrame],
                       ml_model: str,
                       feat_method: str,
@@ -25,10 +26,10 @@ def evaluate_crossval(datafile: Union[str, DataFrame],
                       to_transform=['y'],
                       **kwargs):
     """Cross validated metrics for a set of model, dataset, and feature type.
-    
+
     For a specified datafile, ML model, and featurizer, compute the k fold
     cross validated R2 and MSE.
-    
+
     Parameters
     ----------
     datafile : str or DataFrame
@@ -48,14 +49,14 @@ def evaluate_crossval(datafile: Union[str, DataFrame],
     fit_kwargs : dict
         Keyword argument's to the model's fit method.
     **kwargs passed to the model constructor.
-    
+
     Returns
     -------
     dict : The metrics mapped to dataset, featurizer, and model type.
     """
-    if type(datafile) == str:
+    if isinstance(datafile, str):
         dataframe = cytoxnet.dataprep.io.load_data(datafile)
-    elif type(datafile) == pd.core.frame.DataFrame:
+    elif isinstance(datafile, pd.core.frame.DataFrame):
         dataframe = datafile.copy()
     else:
         raise TypeError(
@@ -67,15 +68,15 @@ def evaluate_crossval(datafile: Union[str, DataFrame],
         codex=codex)
     if binary_percentile is not None:
         df_wfeat = cytoxnet.dataprep.dataprep.binarize_targets(
-            df_wfeat, target, percentile = binary_percentile)
+            df_wfeat, target, percentile=binary_percentile)
         metric_names = ['recall_score', 'jaccard_score']
     else:
         metric_names = ['r2_score', 'mean_squared_error']
     # convert to dataset
     dataset = cytoxnet.dataprep.dataprep.convert_to_dataset(
         df_wfeat,
-        X_col = feat_method,
-        y_col = target
+        X_col=feat_method,
+        y_col=target
     )
     # transform data
     dataset, transformers = cytoxnet.dataprep.dataprep.data_transformation(
@@ -94,7 +95,7 @@ def evaluate_crossval(datafile: Union[str, DataFrame],
         tox_model.fit(train, **fit_kwargs)
         metrics_ = tox_model.evaluate(
             val,
-            metrics= metric_names,
+            metrics=metric_names,
             untransform=True,
             # assumes binary if classification
             n_classes=2
@@ -108,6 +109,7 @@ def evaluate_crossval(datafile: Union[str, DataFrame],
         out[mname] = metrics[i]
     return out
 
+
 def grid_evaluate_crossval(datafiles: List[Union[str, DataFrame]],
                            ml_models: List[str],
                            feat_methods: List[str],
@@ -116,10 +118,10 @@ def grid_evaluate_crossval(datafiles: List[Union[str, DataFrame]],
                            parallel: bool = True,
                            **kwargs):
     """Cross validated metrics for a grid of models, datasets, and feats.
-    
+
     For a specified grid of datafile, ML model, and featurizer, compute the
     k fold cross validated R2 and MSE, and return a dataframe of results.
-    
+
     Parameters
     ----------
     datafiles : list of (str or DataFrame)
@@ -143,16 +145,16 @@ def grid_evaluate_crossval(datafiles: List[Union[str, DataFrame]],
             delayed(
                 evaluate_crossval
             )(
-                 datafile,
-                 ml_model = model,
-                 feat_method=feature,
-                 target=targets_codex[datafile],
-                 k=k,
-                 **kwargs
-            ) for datafile in datafiles for model in ml_models\
-                  for feature in feat_methods
+                datafile,
+                ml_model=model,
+                feat_method=feature,
+                target=targets_codex[datafile],
+                k=k,
+                **kwargs
+            ) for datafile in datafiles for model in ml_models
+            for feature in feat_methods
         )
-        
+
     else:
         output = []
         for datafile in datafiles:
@@ -161,14 +163,14 @@ def grid_evaluate_crossval(datafiles: List[Union[str, DataFrame]],
                     try:
                         out = evaluate_crossval(
                             datafile,
-                            ml_model = model,
+                            ml_model=model,
                             feat_method=feature,
                             target=targets_codex[datafile],
                             k=k,
                             **kwargs
                         )
                         output.append(out)
-                    except:
+                    except BaseException:
                         print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
                         print(datafile, model, feature)
                         raise

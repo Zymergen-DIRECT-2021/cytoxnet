@@ -1,9 +1,17 @@
+import os
+import ast
+import re
+
 import rdkit
 from rdkit import Chem
 import deepchem as dc
+import numpy as np
+import pandas as pd
+
+import cytoxnet.dataprep.dataprep as dp
 
 
-def molstr_to_Mol(dataframe, strcolumnID='InChI String'):
+def molstr_to_Mol(dataframe, id_col='InChI String'):
     """
     Converts DataFrame column containing the string representations of
     molecules and add a corresponding column of Mol objects.
@@ -12,7 +20,7 @@ def molstr_to_Mol(dataframe, strcolumnID='InChI String'):
     ----------
     dataframe: DataFrame containing a column with string representations
     of molecules
-    strcolumnID: label for the column containg the string representations for
+    id_col: label for the column containg the string representations for
     converstion, default='InChI String'- can be changed for the user's
     standard column name
 
@@ -22,25 +30,40 @@ def molstr_to_Mol(dataframe, strcolumnID='InChI String'):
     column label is 'Mol'
 
     """
+    dataframe = dataframe.copy()
     mols = []
-    if 'inchi' in strcolumnID.lower():
-        for inchi in dataframe[strcolumnID]:
+    if 'inchi' in id_col.lower():
+        for inchi in dataframe[id_col]:
             mol = Chem.MolFromInchi(inchi)
             mols.append(mol)
 
-    elif 'smiles' in strcolumnID.lower():
-        for smiles in dataframe[strcolumnID]:
+    elif 'smiles' in id_col.lower():
+        for smiles in dataframe[id_col]:
             mol = Chem.MolFromSmiles(smiles)
             mols.append(mol)
 
     dataframe['Mol'] = mols
     return dataframe
 
+def from_np_array(array_string):
+    """Convert a string to numpy array.
+    
+    Used for loading string arrays in pandas dataframes.
+    """
+    try:
+        array_string = re.sub('\[\s*', '[', array_string)
+        array_string = ','.join(array_string.split())
+        out = np.array(ast.literal_eval(array_string))
+    except:
+        out = None
+    return out
 
 def add_features(dataframe,
-                 MolcolumnID='Mol',
+                 id_col='smiles',
                  method='CircularFingerprint',
                  codex=None,
+                 canonicalize=True,
+                 drop_na=True,
                  **kwargs):
     """
     Featurizes a set of Mol objects using the desired feturization method.
@@ -58,8 +81,14 @@ def add_features(dataframe,
     dataframe: a DataFrame containing a column with Mol objects-
     may want to play around with how we want to input the set of Mols
     for featurization
-    columnID: label of the column containing the Mol objects, default based
+    id_col: label of the column containing the Mol objects, default based
     on function for adding a Mol column
+    codex : str
+        path to the codex containing smiles and features
+    canonicalize : bool
+        Whether or not to first canonicalize the id_column
+    drop_na : bool
+        Whether to drop nas of post featurization data
 
     Returns
     -------
@@ -67,34 +96,46 @@ def add_features(dataframe,
     object with the featurization method as the column ID
 
     """
-    
-    # Check that set contains Mol objects
-    assert isinstance(dataframe[MolcolumnID].values[0], rdkit.Chem.Mol),\
-        'Mol column does not contain Mol object'
+    dataframe = dataframe.copy()
+    if canonicalize:
+        dataframe[id_col] = dataframe[id_col].apply(
+            lambda x: dp.canonicalize_smiles(x)
+        )
+    # try to get features from codex
+    if codex is not None:
+        assert os.path.exists(codex)
+        compounds = pd.read_csv(
+            codex, index_col=0, converters={method: from_np_array}
+        )
+        if method in compounds.columns:
+            # determine which ids are in the codex
+            dataframe['ind'] = dataframe.index
+            overlap = dataframe.merge(
+                compounds, how='inner', on=[id_col]
+            ).set_index('ind', drop=True)
+            dataframe[method] = overlap[method]
+            dataframe.drop(columns=['ind'], inplace=True)
+        else:
+            dataframe[method] = None
+    else:
+        dataframe[method] = None
+        
+    # compute features for the non featurized ones
+    dataframe_ = dataframe[dataframe.isna()[method]]
+    dataframe_ = molstr_to_Mol(dataframe_, id_col=id_col)
+
     featurizer = getattr(dc.feat, method)(**kwargs)
-    f = list(featurizer.featurize(dataframe['Mol'].values))
-    dataframe[method] = f
-
-    # assert isinstance(object_in_set, rdkit.Chem.rdchem.Mol)
-
-    # molecules format optins-  rdkit.Chem.rdchem.Mol /
-    # SMILES string / iterable
-    # either a loop or pass an iterable set of Mol
-    # iterable = convert column of Mol to array
-    # features = featurizer.featurize(iterable)
-    # add the featurized representation into the passed dataframe
-    # dataframe[method] = features
-
+    f = list(featurizer.featurize(dataframe_['Mol'].values))
+    dataframe_[method] = f
+    dataframe.loc[dataframe_.index, method] = dataframe_[method]
+    
+    # drop na
+    if drop_na:
+        # raw nans
+        dataframe.dropna(subset=[method], inplace=True)
+        # nans within the arrays
+        featarray = np.vstack(dataframe[method].values)
+        naninds = np.unique(np.where(np.isnan(featarray))[0])
+        dataframe.drop(index=dataframe.index[naninds], inplace=True)
     return dataframe
 
-
-def get_descriptors(dataframe, descriptor_type):
-    """
-    Extracts molecular descriptors and adds them to a new column
-    Something to look into in the future
-    What descriptors might we want? how can we get them?
-    will need a featurizing function that can take any descriptors we
-    extract here
-    """
-    # dataframe[descriptor_type] = descriptorx_list
-    return dataframe

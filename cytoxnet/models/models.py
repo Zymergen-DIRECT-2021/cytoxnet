@@ -394,7 +394,7 @@ for the task: {}'.format(model.mode)
                                       transformers=transformers,
                                       per_task_metrics=per_task_metrics,
                                       use_sample_weights=use_sample_weights,
-                                      n_classes=n_classes)
+                                      n_classes=n_classes, **kwargs)
         return returns
 
     def visualize(self,

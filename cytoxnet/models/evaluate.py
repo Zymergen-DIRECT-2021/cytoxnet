@@ -20,6 +20,9 @@ def evaluate_crossval(datafile: Union[str, DataFrame],
                       k: int = 5,
                       codex: str = None,
                       fit_kwargs: dict = {},
+                      binary_percentile=None,
+                      transformations=[],
+                      to_transform=['y'],
                       **kwargs):
     """Cross validated metrics for a set of model, dataset, and feature type.
     
@@ -62,6 +65,12 @@ def evaluate_crossval(datafile: Union[str, DataFrame],
         dataframe,
         method=feat_method,
         codex=codex)
+    if binary_percentile is not None:
+        df_wfeat = cytoxnet.dataprep.dataprep.binarize_targets(
+            df_wfeat, target, percentile = binary_percentile)
+        metric_names = ['recall_score', 'jaccard_score']
+    else:
+        metric_names = ['r2_score', 'mean_squared_error']
     # convert to dataset
     dataset = cytoxnet.dataprep.dataprep.convert_to_dataset(
         df_wfeat,
@@ -71,8 +80,8 @@ def evaluate_crossval(datafile: Union[str, DataFrame],
     # transform data
     dataset, transformers = cytoxnet.dataprep.dataprep.data_transformation(
         dataset,
-        transformations=['NormalizationTransformer'],
-        to_transform=['y']
+        transformations=transformations,
+        to_transform=to_transform
     )
     folds = cytoxnet.dataprep.dataprep.data_splitting(
         dataset, split_type='k', k=k
@@ -85,15 +94,18 @@ def evaluate_crossval(datafile: Union[str, DataFrame],
         tox_model.fit(train, **fit_kwargs)
         metrics_ = tox_model.evaluate(
             val,
-            metrics=['r2_score', 'mean_squared_error'],
-            untransform=True)
+            metrics= metric_names,
+            untransform=True,
+            # assumes binary if classification
+            n_classes=2
+        )
         metrics.append(list(metrics_.values()))
     metrics = np.average(np.array(metrics), axis=0)
     out = {'datafile': datafile,
            'model': ml_model,
-           'featurizer': feat_method,
-           'r2': metrics[0],
-           'MSE': metrics[1]}
+           'featurizer': feat_method}
+    for i, mname in enumerate(metric_names):
+        out[mname] = metrics[i]
     return out
 
 def grid_evaluate_crossval(datafiles: List[Union[str, DataFrame]],

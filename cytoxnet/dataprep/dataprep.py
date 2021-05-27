@@ -89,9 +89,10 @@ def binarize_targets(dataframe,
         target_cols = [target_cols]
     assert all([col in dataframe.columns for col in target_cols]),\
         'Not all columns are in the dataframe'
-    assert all([dtype == float for dtype in dataframe[target_cols]].dtypes),\
+    assert all([dtype == float for dtype in dataframe[target_cols].dtypes]),\
         'Target columns should have float data types'
-    subset = dataframe[target_cols]
+    dataframe_ = dataframe.copy()
+    subset = dataframe_[target_cols]
     # the user wants to specify specific values
     if value is not None:
         if type(value) == float:
@@ -105,7 +106,11 @@ def binarize_targets(dataframe,
         value = subset.quantile(percentile).values
     
     # now mask the targets
-    
+    dataframe_[target_cols] = subset > value
+    # maybe switch
+    if high_positive == False:
+        dataframe_[target_cols] = ~dataframe_[target_cols]
+    return dataframe_
 
 def canonicalize_smiles(smiles, raise_error=False):
     """Canonicalize a smiles string.

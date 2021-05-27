@@ -1,6 +1,6 @@
-,datafile,model,featurizer,r2,MSE
-0,lunghini_fish_LC50,GraphCNN,ConvMolFeaturizer,0.4290796729772176,4.0495797275156775
-1,lunghini_daphnia_EC50,GraphCNN,ConvMolFeaturizer,0.4150323145636543,4.4626796449631625
-2,lunghini_algea_EC50,GraphCNN,ConvMolFeaturizer,0.30392739334970964,3.8134137403489943
-3,zhu_rat_LD50,GraphCNN,ConvMolFeaturizer,0.5064281188888525,0.45388758860715966
-4,chembl_ecoli_MIC,GraphCNN,ConvMolFeaturizer,0.704966890581377,1.6395850902867615
+,datafile,model,featurizer,r2_score,mean_squared_error
+0,lunghini_fish_LC50,GraphCNN,ConvMolFeaturizer,0.5195209888293186,3.4751621866917355
+1,lunghini_daphnia_EC50,GraphCNN,ConvMolFeaturizer,0.4962285796575593,3.8466976967159026
+2,lunghini_algea_EC50,GraphCNN,ConvMolFeaturizer,0.381756942641634,3.378626894614316
+3,zhu_rat_LD50,GraphCNN,ConvMolFeaturizer,0.4902013296862139,0.4669940757146821
+4,chembl_ecoli_MIC,GraphCNN,ConvMolFeaturizer,0.7168891505205195,1.5759182142445276

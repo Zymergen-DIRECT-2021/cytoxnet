@@ -14,10 +14,14 @@ datafiles = [
     'zhu_rat_LD50',
     'chembl_ecoli_MIC'
 ]
-ml_models = ['GraphCNN']
+ml_models = ['RFC', 'GPC', 'KNNC']
 featurizers = [
-    'ConvMolFeaturizer'
+    'MordredDescriptors',
+    'CircularFingerprint',
+    'RDKitDescriptors',
+    'MACCSKeysFingerprint'
 ]
+
 
 df = ev.grid_evaluate_crossval(
     datafiles,
@@ -25,7 +29,8 @@ df = ev.grid_evaluate_crossval(
     featurizers,
     targets_codex,
     parallel=True,
-    mode='regression',
-    fit_kwargs={'nb_epoch': 100}
+    codex='database/compounds.csv',
+    binary_percentile=0.5,
+    use_weights=False
 )
-df.to_csv('regression_graph_results2.csv')
+df.to_csv('classification_grid_results.csv')

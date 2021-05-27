@@ -22,15 +22,14 @@ featurizers = [
     'MACCSKeysFingerprint'
 ]
 
-featurizers.reverse()
-datafiles.reverse()
 
 df = ev.grid_evaluate_crossval(
     datafiles,
     ml_models,
     featurizers,
     targets_codex,
-    parallel=False,
+    parallel=True,
+    transformations=['NormalizationTransformer'],
     codex='database/compounds.csv'
 )
-df.to_csv('regression_grid_results2.csv')
+df.to_csv('regression_grid_results.csv')

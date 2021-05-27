@@ -1,0 +1,6 @@
+,datafile,model,featurizer,recall_score,jaccard_score
+0,lunghini_fish_LC50,GraphCNN,ConvMolFeaturizer,0.7522782835982149,0.6243004124584608
+1,lunghini_daphnia_EC50,GraphCNN,ConvMolFeaturizer,0.7291146290108222,0.5904880086556888
+2,lunghini_algea_EC50,GraphCNN,ConvMolFeaturizer,0.7439111612029841,0.5805824326431301
+3,zhu_rat_LD50,GraphCNN,ConvMolFeaturizer,0.7470480009839608,0.6028790582039953
+4,chembl_ecoli_MIC,GraphCNN,ConvMolFeaturizer,0.9117083041711849,0.8078401565692512

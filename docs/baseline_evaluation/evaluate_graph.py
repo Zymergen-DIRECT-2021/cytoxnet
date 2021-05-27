@@ -26,6 +26,6 @@ df = ev.grid_evaluate_crossval(
     targets_codex,
     parallel=True,
     mode='regression',
-    fit_kwargs={'nb_epoch': 50}
+    fit_kwargs={'nb_epoch': 100}
 )
-df.to_csv('regression_graph_results.csv')
+df.to_csv('regression_graph_results2.csv')

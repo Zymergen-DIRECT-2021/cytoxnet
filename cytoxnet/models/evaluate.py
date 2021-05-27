@@ -146,14 +146,19 @@ def grid_evaluate_crossval(datafiles: List[Union[str, DataFrame]],
         for datafile in datafiles:
             for model in ml_models:
                 for feature in feat_methods:
-                    out = evaluate_crossval(
-                        datafile,
-                        ml_model = model,
-                        feat_method=feature,
-                        target=targets_codex[datafile],
-                        k=k,
-                        **kwargs
-                    )
-                    output.append(out)
+                    try:
+                        out = evaluate_crossval(
+                            datafile,
+                            ml_model = model,
+                            feat_method=feature,
+                            target=targets_codex[datafile],
+                            k=k,
+                            **kwargs
+                        )
+                        output.append(out)
+                    except:
+                        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                        print(datafile, model, feature)
+                        raise
     df = pd.DataFrame(output)
     return df

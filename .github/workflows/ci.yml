@@ -35,7 +35,7 @@ jobs:
         flake8 cytoxnet --docstring-convention numpy --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
     - name: Test coverage with pytest
       run: |
-        coverage run --omit="cytoxnet/tests/*" --source="cytoxnet" -m pytest
+        coverage run --omit="cytoxnet/tests/*" --source="cytoxnet" -m pytest cytoxnet
     - name: Generate coverage report
       run: |
         coverage report

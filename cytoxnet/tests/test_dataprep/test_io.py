@@ -139,11 +139,15 @@ def test_add_datasets(tmpdir):
             'foreign keys not assigned properly'
         
         # add package data
-        cytoxnet.dataprep.io.add_datasets(['lunghini_algea_EC50'],
-                                          ['mydata3'],
-                                          id_col='smiles',
-                                          db_path=tempdir+'/database')
-        subject = pd.read_csv(tempdir+'/database/mydata3.csv', index_col=0)
-        assert len(subject) == 1440,\
-            "Did not add package data successfully"
+        with mock.patch(
+            'cytoxnet.dataprep.io.load_data',
+            return_value=pd.DataFrame({'smiles':['C', 'O']})
+        ) as mocked_load_data:
+            cytoxnet.dataprep.io.add_datasets(['lunghini_algea_EC50'],
+                                              ['mydata3'],
+                                              id_col='smiles',
+                                              db_path=tempdir+'/database')
+            assert mocked_load_data.called,\
+                'Load data was not called for the string'
+
     return

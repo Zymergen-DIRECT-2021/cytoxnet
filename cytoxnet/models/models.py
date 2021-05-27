@@ -67,6 +67,10 @@ _MODELS = {
         "(sklearn) Gaussian Process Classifier. Accepts vector features.",
         "sklearn.gaussian_process.GaussianProcessClassifier",
     ),
+    "KNNC": (
+        "(sklearn) K nearest neighbor Classifier. Accepts vector features.",
+        "sklearn.neighbors.KNeighborsClassifier",
+    ),
     "GraphCNN": (
         "(deepchem) Graph Convolutional Neural Network. Accepts graph\
  features.",
@@ -102,6 +106,11 @@ class ToxModel:
             Data transformations to apply to output predictions. If the
             training data was transformed/preprocessed, this will allow
             predictions and evaluation to be done in the raw data space.
+        tasks : list of str
+            Names for the different targets. Default only one unnamed task.
+        use_weights : bool, default False
+            Only relevant for sklearn models, some of which can accept weights
+            for fitting while others cannot.
         kwargs
             Keyword arguments to pass to the model type for initialization.
 
@@ -159,6 +168,7 @@ class ToxModel:
                  model_name: str,
                  tasks: List[str] = None,
                  transformers: List[Transformer] = None,
+                 use_weights: bool = False,
                  **kwargs):
         # pseudocode
         # >check model type is available in dict
@@ -207,7 +217,7 @@ for the task: {}'.format(model.mode)
         # if the model was sklearn, wrap
         elif issubclass(ModelClass, sklearn.base.BaseEstimator):
             model = ModelClass(**kwargs)
-            self.model = deepchem.models.SklearnModel(model)
+            self.model = deepchem.models.SklearnModel(model, use_weights=use_weights)
 
         # save transformers
         if transformers is not None:

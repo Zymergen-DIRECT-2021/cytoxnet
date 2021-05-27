@@ -14,7 +14,7 @@ datafiles = [
     'zhu_rat_LD50',
     'chembl_ecoli_MIC'
 ]
-ml_models = ['RFC', 'GPC']
+ml_models = ['RFC', 'GPC', 'KNNC']
 featurizers = [
     'MordredDescriptors',
     'CircularFingerprint',

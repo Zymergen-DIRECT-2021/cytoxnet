@@ -188,6 +188,7 @@ def add_datasets(dataframes,
     assert id_col in master.columns, f'The master data file should have the\
  column id_col=`{id_col}`'
     
+    dfs_out = []
     for i, df in enumerate(dataframes_):
         
         # canonicalize
@@ -216,6 +217,7 @@ def add_datasets(dataframes,
             fkey = int(master.index[master[id_col] == sm].values)
             fkeys.append(fkey)
         df['foreign_key'] = fkeys
+        dfs_out.append(df)
         df.to_csv(db_path+'/'+names[i]+'.csv')
     
     if new_featurizers is not None:
@@ -228,4 +230,5 @@ def add_datasets(dataframes,
                                      id_col=id_col,
                                      method=f)
     master.to_csv(db_path+'/compounds.csv')
-    return
+    cleaned_db_frames = dict(zip(names, dfs_out))
+    return cleaned_db_frames

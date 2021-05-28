@@ -38,8 +38,8 @@ Gaussian process regression (GPR).
 >>>type(mymodel.model)
 sklearn.gaussian_process._gpr.GaussianProcessRegressor
 """
-# deepchem sklearn model wrapper might be helpful
 
+import importlib
 from typing import Type, Union, List
 
 import altair as alt
@@ -67,6 +67,10 @@ _MODELS = {
         "(sklearn) Gaussian Process Classifier. Accepts vector features.",
         "sklearn.gaussian_process.GaussianProcessClassifier",
     ),
+    "KNNC": (
+        "(sklearn) K nearest neighbor Classifier. Accepts vector features.",
+        "sklearn.neighbors.KNeighborsClassifier",
+    ),
     "GraphCNN": (
         "(deepchem) Graph Convolutional Neural Network. Accepts graph\
  features.",
@@ -76,6 +80,14 @@ _MODELS = {
         "(sklearn) Least Absolute Shrinkage and Selection Operator. Accepts\
  vector features",
         "sklearn.linear_model.Lasso"
+    ),
+    "RFR": (
+        "(sklearn) Random Forest Regressor. Accepts vector features.",
+        "sklearn.ensemble.RandomForestRegressor"
+    ),
+    "RFC": (
+        "(sklearn) Random Forest Classifier. Accepts vector features.",
+        "sklearn.ensemble.RandomForestClassifier"
     )
 }
 
@@ -94,6 +106,11 @@ class ToxModel:
             Data transformations to apply to output predictions. If the
             training data was transformed/preprocessed, this will allow
             predictions and evaluation to be done in the raw data space.
+        tasks : list of str
+            Names for the different targets. Default only one unnamed task.
+        use_weights : bool, default False
+            Only relevant for sklearn models, some of which can accept weights
+            for fitting while others cannot.
         kwargs
             Keyword arguments to pass to the model type for initialization.
 
@@ -151,6 +168,7 @@ class ToxModel:
                  model_name: str,
                  tasks: List[str] = None,
                  transformers: List[Transformer] = None,
+                 use_weights: bool = False,
                  **kwargs):
         # pseudocode
         # >check model type is available in dict
@@ -199,7 +217,8 @@ for the task: {}'.format(model.mode)
         # if the model was sklearn, wrap
         elif issubclass(ModelClass, sklearn.base.BaseEstimator):
             model = ModelClass(**kwargs)
-            self.model = deepchem.models.SklearnModel(model)
+            self.model = deepchem.models.SklearnModel(
+                model, use_weights=use_weights)
 
         # save transformers
         if transformers is not None:
@@ -244,17 +263,10 @@ for the task: {}'.format(model.mode)
         # get package and subpackage names
         components = model_type.split('.')
         # import package
-        mod = __import__(components[0])
+        mod = importlib.import_module('.'.join(components[:-1]))
         # import subpackages
-        for i, comp in enumerate(components[1:]):
-            if not hasattr(mod, comp):
-                raise AttributeError(
-                    'The module {} does not contain the attribute {}'.format(
-                        components[:i], comp
-                    )
-                )
-            mod = getattr(mod, comp)
-        return mod
+        Model = getattr(mod, components[-1])
+        return Model
 
     def help(model_name: str = None):
         """Get list of available model classes, or help on specific one.
@@ -393,7 +405,7 @@ for the task: {}'.format(model.mode)
                                       transformers=transformers,
                                       per_task_metrics=per_task_metrics,
                                       use_sample_weights=use_sample_weights,
-                                      n_classes=n_classes)
+                                      n_classes=n_classes, **kwargs)
         return returns
 
     def visualize(self,

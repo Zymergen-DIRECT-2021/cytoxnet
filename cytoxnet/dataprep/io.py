@@ -2,14 +2,19 @@
 Input/Output module for loading data and generating output files.
 """
 import os
-import pkg_resources
 
+import numpy as np
 import pandas as pd
+import deepchem as dc
 
 import cytoxnet.dataprep.featurize as ft
+import cytoxnet.dataprep.dataprep as dp
+import cytoxnet.data as data
+
+np.set_printoptions(threshold=np.inf)
 
 
-def load_data(csv_file,
+def load_data(file,
               cols=None,
               id_cols=None,
               duplicates='drop',
@@ -41,11 +46,29 @@ def load_data(csv_file,
     if isinstance(id_cols, str):
         id_cols = [id_cols]
     # assert file exists and contains data
-    if isinstance(csv_file, str):
-        assert os.path.exists(csv_file), 'File name does not exist'
+    if isinstance(file, str):
+        if os.path.exists(file):
+            pass
+        # or is in the package data
+        else:
+            file_ = None
+            package_data_location = data.__path__._path[0]
+            data_files = os.listdir(package_data_location)
+            for f in data_files:
+                if file == f.split('.')[0]:
+                    file_ = package_data_location + '/' + f
+                    break
+            if file_ is None:
+                raise FileNotFoundError(
+                    'file must be a valid path or the name without extension\
+ of a file in the package data.'
+                )
+            else:
+                file = file_
+
     # run any more checks specific to the data that we may want to add
     # load a csv file into a dataframe
-    df = pd.read_csv(csv_file, index_col=0)
+    df = pd.read_csv(file, index_col=0)
     # drop any unwanted columns
     if cols is not None:
         df = df[cols]
@@ -76,122 +99,137 @@ def load_data(csv_file,
     return df
 
 
-def load_chembl_ecoli():
-    # get the path in the package
-    path = pkg_resources.resource_stream(
-        __name__, '../data/chembl_ecoli_MIC.csv'
-    )
-    df = load_data(path,
-                   cols=['smiles', 'MIC'],
-                   id_cols=['smiles'],
-                   nans="drop")
-    return df
+def create_compound_codex(db_path='./database',
+                          id_col='smiles',
+                          featurizers=None,
+                          **kwargs):
+    """
+    Create a compound codex for a combined database.
 
+    Creates a master csv file that tracks the unique canonicalized smiles of
+    all data in the database, and stores deatures for those data.
 
-def load_zhu_rat():
-    path = pkg_resources.resource_stream(
-        __name__, '../data/zhu_rat_LD50.csv'
-    )
-    df = load_data(path,
-                   cols=['smiles', 'LD50'],
-                   id_cols=['smiles'],
-                   nans='drop')
-    return df
-
-
-def load_lunghini(species=['algea', 'fish', 'daphnia'], nans='drop'):
-    assert len(species) > 0,\
-        "Secies must be one or more of algea, fish, daphnia"
-
-    path = pkg_resources.resource_stream(__name__, '../data/lunghini.csv')
-    cols = ['smiles']
-    # get the target columns to consider
-    if 'algea' in species:
-        cols.append('algea_EC50')
-    if 'fish' in species:
-        cols.append('fish_LC50')
-    if 'daphnia' in species:
-        cols.append('daphnia_EC50')
-
-    df = load_data(path,
-                   cols=cols,
-                   id_cols=['smiles'],
-                   nans=nans)
-    return df
-
-def create_data_codex(path='./data_codex.csv',
-                      featurizer=None,
-                      **kwargs):
-    lunghini = load_lunghini(nans='keep')
-    zhu_rat = load_zhu_rat()
-#     chembl_ecoli = load_chembl_ecoli()
-    
-    codex = pd.DataFrame(pd.concat(
-        [
-            lunghini['smiles'],
-            zhu_rat['smiles'],
-#             chembl_ecoli['smiles']
-        ],
-        ignore_index=True
-    ))
-    
-    codex.drop_duplicates(subset='smiles', inplace=True)
-    
-    if featurizer is not None:
-        assert all([type(f) == str for f in featurizer]),\
-            "featurizer should be a list of featurizers to use"
-        codex = ft.molstr_to_Mol(codex, strcolumnID='smiles')
-        for f in featurizer:
-            codex = ft.add_features(codex,
-                                    MolcolumnID='Mol',
-                                    method=f,
-                                    **kwargs)
-        codex.drop('Mol', axis=1, inplace=True)
-    codex.to_csv(path)
+    Parameters
+    ----------
+    db_path : str
+        The path to the folder to contain database files. Will create direcory
+        if it does not exist.
+    id_col : str
+        The column in all dataframes representing the compound id.
+    featurizers : str or list of str
+        The featurizer/s to initialize the compounds codex with.
+    """
+    if featurizers is not None:
+        if not isinstance(featurizers, list):
+            featurizers = [featurizers]
+        assert all([hasattr(dc.feat, f) for f in featurizers]),\
+            "featurizer should be a list of valid featurizers to use"
+        master = pd.DataFrame(columns=[id_col, *featurizers])
+    else:
+        master = pd.DataFrame(columns=[id_col])
+    if not os.path.exists(db_path):
+        os.makedirs(db_path)
+    master.to_csv(db_path + '/compounds.csv')
     return
 
-def add_dataset(dataframe,
-                id_col='smiles',
-                path = './data_codex.csv',
-                new_featurizer=None,
-                **kwargs):
-    assert id_col in dataframe.columns, "dataframe should have `id_col`"
-    master = load_data(path, nans='keep', duplicates='keep')
-    dataframe_ = dataframe.copy()
-    dataframe_.rename(
-        columns={id_col: 'smiles'}, inplace=True
-    )
-    
-    # first extract the non duplicate molecules
-    common = dataframe_.merge(master, on='smiles')['smiles']
-    uniques = pd.DataFrame(dataframe_[
-        ~dataframe_['smiles'].isin(common)
-    ]['smiles'])
-    
-    # create a mol object for these smiles
-    uniques = ft.molstr_to_Mol(uniques, strcolumnID='smiles')
-    
-    # compute the features already in the codex for these unique values
-    for col_name in master.columns:
-        if col_name != 'smiles':
-            uniques = ft.add_features(uniques,
-                                      MolcolumnID='Mol',
-                                      method=col_name,
-                                      **kwargs)
 
-    # add these new values to the codex
-    master = pd.concat([master, uniques], ignore_index=True)
-    
-    if new_featurizer is not None:
-        assert all([type(f) == str for f in new_featurizer]),\
-            "new_featurizer should be a list of featurizers to use"
-        master = ft.molstr_to_Mol(master, strcolumnID='smiles')
-        for f in new_featurizer:
+def add_datasets(dataframes,
+                 names,
+                 id_col='smiles',
+                 db_path='./database',
+                 new_featurizers=None,
+                 **kwargs):
+    """Add a new set of data to the tracked database.
+
+    Update the compounds csv with new dataset/s canonicalized, and saves
+    csvs to the database folder with foreign keys tracked.
+
+    Parameters
+    ----------
+    dataframes : dataframe or string or list of them
+        The datasets to add. If it is a string object, we will attempt to load
+        the file at the string path or a file in the package data.
+    id_col : str
+        The column in all dataframes representing the compound id
+    db_path : str
+        The path to the folder containing database files.
+    new_featurizers : str or list of str, default None
+        Featurizer names to apply to the new data as well as all current data.
+    """
+    # get data from package if it is not already in dataframe form
+    if not isinstance(dataframes, list):
+        dataframes = [dataframes]
+    if not isinstance(names, list):
+        names = [names]
+    assert len(names) == len(dataframes),\
+        'names should be the names of the datasets passed, with the same len'
+
+    dataframes_ = []
+    for df in dataframes:
+        if isinstance(df, pd.core.frame.DataFrame):
+            dataframes_.append(df.copy())
+        elif isinstance(df, str):
+            try:
+                loaded_df = load_data(df)
+                dataframes_.append(loaded_df)
+            except BaseException:
+                raise ValueError(
+                    f'One of the dataframes passed ({df}) was a string, but\
+ does not correspond to a file or package dataset.'
+                )
+        else:
+            raise ValueError(
+                f'Could not add input dataset {df} fo type {type(df)}.'
+            )
+        assert id_col in dataframes_[-1].columns,\
+            f'Cannot add a dataset that does not have the id_col={id_col}\
+ column'
+
+    master = pd.read_csv(db_path + '/compounds.csv', index_col=0)
+    assert id_col in master.columns, f'The master data file should have the\
+ column id_col=`{id_col}`'
+
+    dfs_out = []
+    for i, df in enumerate(dataframes_):
+
+        # canonicalize
+        df[id_col] = df[id_col].apply(lambda x: dp.canonicalize_smiles(x))
+        df.dropna(subset=[id_col], inplace=True)
+        # first extract the molecules that already exist in the codex
+        common = df.merge(master, on=id_col)[id_col]
+        # and now the ones that do not - the data may have duplicates and we
+        # only want to one set
+        uniques = pd.DataFrame(df[
+            ~df[id_col].isin(common)
+        ][[id_col]])
+        uniques.drop_duplicates(subset=[id_col], inplace=True)
+        # compute the features already in the codex for these unique values
+        for col_name in master.columns:
+            if col_name != id_col:
+                uniques = ft.add_features(uniques,
+                                          id_col=id_col,
+                                          method=col_name,
+                                          **kwargs)
+        # add these new values to the codex
+        master = pd.concat([master, uniques], ignore_index=True)
+        # get the foreign key for the data
+        fkeys = []
+        for sm in df[id_col].values:
+            fkey = int(master.index[master[id_col] == sm].values)
+            fkeys.append(fkey)
+        df['foreign_key'] = fkeys
+        dfs_out.append(df)
+        df.to_csv(db_path + '/' + names[i] + '.csv')
+
+    if new_featurizers is not None:
+        if not isinstance(new_featurizers, list):
+            new_featurizers = [new_featurizers]
+        assert all([isinstance(f, str) for f in new_featurizers]),\
+            "new_featurizers should be a list of featurizers to use"
+        for f in new_featurizers:
             master = ft.add_features(master,
-                                     MolcolumnID='Mol',
+                                     id_col=id_col,
                                      method=f)
-    # drop Mol
-    master.drop('Mol', axis=1, inplace=True)
-    print(path)
-    master.to_csv(path)
-    return
+    master.to_csv(db_path + '/compounds.csv')
+    cleaned_db_frames = dict(zip(names, dfs_out))
+    return cleaned_db_frames

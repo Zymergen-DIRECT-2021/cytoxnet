@@ -14,8 +14,9 @@ def convert_to_categorical(dataframe, cols=None):
 
     Parameters
     ----------
-    - dataframe: featurized dataframe
-    - cols: list of categorical columns to convert to integers
+    - dataframe: DataFrame 
+    - cols: list of str
+        list of categorical columns to convert to integers
 
     Returns
     -------
@@ -60,7 +61,8 @@ def binarize_targets(dataframe,
                      high_positive: bool = False,
                      percentile: float = 0.5,
                      value: Union[float, List[float]] = None):
-    """Binarize target columns for classification.
+    """
+    Binarize target columns for classification.
 
     For targets of continuous variables, binarize based on a position in the
     distribution.
@@ -72,9 +74,9 @@ def binarize_targets(dataframe,
     target_cols : str or list of str
         The column names to binarize.
     high_positive : bool
-        If the end of the distribution higher than the chosen position should
-        considered a posative target. eg. if True: posatives labeled for data
-        > the postition
+        Whether values above the chosen threshhold should be
+        considered a positive target. eg. if True: positives labeled for data
+        > the position
     percentile : float, default = 0.5 (median)
         The relative position in the distribution to consider for the two
         classes
@@ -119,7 +121,8 @@ def binarize_targets(dataframe,
 
 
 def canonicalize_smiles(smiles, raise_error=False):
-    """Canonicalize a smiles string.
+    """
+    Canonicalize a smiles string.
 
     Parameters
     ----------
@@ -149,7 +152,8 @@ def canonicalize_smiles(smiles, raise_error=False):
 def handle_sparsity(dataframe,
                     y_col: List[str],
                     w_label: str = 'w'):
-    """Prepares sparse data to be learned.
+    """
+    Prepares sparse data to be learned.
 
     Replace nans with 0.0 in the dataset so that it can be input to a model,
     and create a weight matrix with all nan values as 0.0 weight so that they

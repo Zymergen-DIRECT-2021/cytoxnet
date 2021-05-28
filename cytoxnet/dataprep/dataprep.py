@@ -109,12 +109,17 @@ def binarize_targets(dataframe,
  match the number of target columns."
     else:
         value = subset.quantile(percentile).values
-
+        
+    # get the Nan indexes
+    nans = dataframe_.isna()
     # now mask the targets
+    # this will fill over nan values (bad!)
     dataframe_[target_cols] = subset > value
     # maybe switch
     if not high_positive:
         dataframe_[target_cols] = ~dataframe_[target_cols]
+    # refill nans
+    dataframe_[nans] = np.nan
     return dataframe_
 
 
@@ -146,38 +151,30 @@ def canonicalize_smiles(smiles, raise_error=False):
     return csmiles
 
 
-def handle_sparsity(dataframe,
-                    y_col: List[str],
-                    w_label: str = 'w'):
+def handle_sparsity(dataset):
     """Prepares sparse data to be learned.
 
-    Replace nans with 0.0 in the dataset so that it can be input to a model,
-    and create a weight matrix with all nan values as 0.0 weight so that they
+    Replace nans with 0.0 in the dataset targets so it can be input to a model,
+    and scale the weight matrix with all nan values as 0.0 weight so that they
     do not introduce bias.
 
     Parameters
     ----------
-    dataframe : pd.DataFrame
-        The dataframe with sparse targets.
-    y_col : list of str
-        The names of all columns containing the targets.
-    w_label : str
-        The string to add to the target names to create columns of weights in
-        the dataframe.
+    dataframe : dc.NumpyDataset
+        The dataset with sparse targets.
 
     Returns
     -------
-    pd.DataFrame with sparsity handled
+    dataset
     """
-    w_names = [w_label + '_' + target for target in y_col]
-    # compute weights based on presence of nan
-    dataframe[w_names] = np.float64(
-        ~dataframe[y_col].isnull().values
-    )
-    # It does not matter what value we replace the nans with as the weight is
-    # 0, but it has to be numeric to not break the models
-    dataframe = dataframe.fillna(0)
-    return dataframe
+    X, y, w, i = (dataset.X, dataset.y, dataset.w, dataset.ids)
+    nans = np.isnan(y)
+    # w may be only a vector instead of shape of data
+    w = np.tile(w, y.shape[1]) 
+    w *= ~nans
+    y = np.nan_to_num(y)
+    dataset_out = dc.data.NumpyDataset(X, y, w, i)
+    return dataset_out
 
 
 def convert_to_dataset(dataframe,
@@ -237,7 +234,7 @@ def convert_to_dataset(dataframe,
     if id_col is not None:
         ids = dataframe[id_col].values
     else:
-        ids = None
+        ids = np.array(dataframe.index)
 
     # create deepchem dataset object
     dataset = dc.data.NumpyDataset(X, y, w, ids)
@@ -247,7 +244,7 @@ def convert_to_dataset(dataframe,
 
 def data_transformation(dataset,
                         transformations: list = ['NormalizationTransformer'],
-                        to_transform: list = [],
+                        to_transform: Union[str, List[str]] = None,
                         **kwargs):
     """
     Transforms and splits deepchem dataset
@@ -258,8 +255,9 @@ def data_transformation(dataset,
     - transformations:
         (List[str]) list of transformation methods to pass dataset through
     - to_transform:
-        (list[str]) list of elements to transform, and can include
-        'X', 'y', or 'w'
+        (str or list[str]) list of elements to transform, and can include
+        'X', 'y', or 'w'. If multiple are specified, must be paried to
+        transformations
     - **kwargs: keyword arguments to be passed to the selected transformer
 
     Returns
@@ -267,6 +265,11 @@ def data_transformation(dataset,
     - transformed dataset
     - list of transformer objects
     """
+    if to_transform is not None:
+        if type(to_transform) == str:
+            to_transform = [to_transform]*len(transformations)
+        elif type(to_transform) == list:
+            assert len(to_transform) == len(transformations)
 
     # make a list to store transformer object, which can later be used to
     # untransform data
@@ -274,10 +277,11 @@ def data_transformation(dataset,
 
     # feed dataset into list of transformers sequentially, returning a single
     # transformed dataset
-    for transformation in transformations:
+    for i, transformation in enumerate(transformations):
         if to_transform is not None:
+            to_transform_ = to_transform[i] 
 
-            if(all(elem in to_transform for elem in ['X', 'y', 'w'])):
+            if(all(elem in to_transform_ for elem in ['X', 'y', 'w'])):
                 transformer = getattr(
                     dc.trans,
                     transformation)(
@@ -286,7 +290,7 @@ def data_transformation(dataset,
                     transform_w=True,
                     dataset=dataset,
                     **kwargs)
-            elif(all(elem in to_transform for elem in ['X', 'y'])):
+            elif(all(elem in to_transform_ for elem in ['X', 'y'])):
                 transformer = getattr(
                     dc.trans,
                     transformation)(
@@ -294,18 +298,19 @@ def data_transformation(dataset,
                     transform_y=True,
                     dataset=dataset,
                     **kwargs)
-            elif 'X' in to_transform:
+            elif 'X' in to_transform_:
                 transformer = getattr(
                     dc.trans, transformation)(
                     transform_X=True, dataset=dataset, **kwargs)
-            elif 'y' in to_transform:
+            elif 'y' in to_transform_:
                 transformer = getattr(
                     dc.trans, transformation)(
                     transform_y=True, dataset=dataset, **kwargs)
             else:
-                transformer = getattr(
-                    dc.trans, transformation)(
-                    dataset=dataset, **kwargs)
+                raise ValueError(
+                    'to_transform was specified but did not contain\
+ exclusively X, y, and w.'
+                )
         else:
             transformer = getattr(
                 dc.trans,

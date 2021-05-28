@@ -2,7 +2,7 @@
 
 import cytoxnet.dataprep.io as io
 
-io.create_compound_codex()
+io.create_compound_codex(db_path='../database')
 
 datasets = ['lunghini_fish_LC50',
             'lunghini_daphnia_EC50',
@@ -14,4 +14,4 @@ featurizers = ['CircularFingerprint',
                'RDKitDescriptors',
                'MACCSKeysFingerprint']
 
-io.add_datasets(datasets, names=names, new_featurizers=featurizers)
+io.add_datasets(datasets, db_path='../database', names=names, new_featurizers=featurizers)

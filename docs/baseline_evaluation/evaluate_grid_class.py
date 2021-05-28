@@ -29,7 +29,7 @@ df = ev.grid_evaluate_crossval(
     featurizers,
     targets_codex,
     parallel=True,
-    codex='database/compounds.csv',
+    codex='../database/compounds.csv',
     binary_percentile=0.5,
     use_weights=False
 )

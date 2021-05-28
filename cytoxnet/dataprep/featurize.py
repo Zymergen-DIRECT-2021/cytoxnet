@@ -2,7 +2,6 @@ import os
 import ast
 import re
 
-import rdkit
 from rdkit import Chem
 import deepchem as dc
 import numpy as np
@@ -45,18 +44,20 @@ def molstr_to_Mol(dataframe, id_col='InChI String'):
     dataframe['Mol'] = mols
     return dataframe
 
+
 def from_np_array(array_string):
     """Convert a string to numpy array.
-    
+
     Used for loading string arrays in pandas dataframes.
     """
     try:
-        array_string = re.sub('\[\s*', '[', array_string)
+        array_string = re.sub('\\[\\s*', '[', array_string)
         array_string = ','.join(array_string.split())
         out = np.array(ast.literal_eval(array_string))
-    except:
+    except BaseException:
         out = None
     return out
+
 
 def add_features(dataframe,
                  id_col='smiles',
@@ -119,7 +120,7 @@ def add_features(dataframe,
             dataframe[method] = None
     else:
         dataframe[method] = None
-        
+
     # compute features for the non featurized ones
     dataframe_ = dataframe[dataframe.isna()[method]]
     dataframe_ = molstr_to_Mol(dataframe_, id_col=id_col)
@@ -128,7 +129,7 @@ def add_features(dataframe,
     f = list(featurizer.featurize(dataframe_['Mol'].values))
     dataframe_[method] = f
     dataframe.loc[dataframe_.index, method] = dataframe_[method]
-    
+
     # drop na
     if drop_na:
         # raw nans
@@ -141,4 +142,3 @@ def add_features(dataframe,
             naninds = np.unique(np.where(np.isnan(featarray))[0])
             dataframe.drop(index=dataframe.index[naninds], inplace=True)
     return dataframe
-

@@ -217,7 +217,8 @@ for the task: {}'.format(model.mode)
         # if the model was sklearn, wrap
         elif issubclass(ModelClass, sklearn.base.BaseEstimator):
             model = ModelClass(**kwargs)
-            self.model = deepchem.models.SklearnModel(model, use_weights=use_weights)
+            self.model = deepchem.models.SklearnModel(
+                model, use_weights=use_weights)
 
         # save transformers
         if transformers is not None:

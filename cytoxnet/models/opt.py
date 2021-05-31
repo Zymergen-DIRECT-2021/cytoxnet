@@ -57,13 +57,13 @@ def hypopt_model(
                 **search_kwargs,
                 **model_kwargs)
             model.fit(train, **fit_kwargs)
-            metric_ = list(
-                model.evaluate(val, [metric], untransform=True, **eval_kwargs).values()
-            )[0]
-            if hasattr(metric_, '__len__'):
-                assert target_index != None, 'Metrics for multiple targets\
- returned, pass target_index to choose the one desired for optimization.'
-                metric_ = metric_[target_index]
+            metric_ = model.evaluate(val, [metric], untransform=True, **eval_kwargs)
+            if type(metric_) == tuple:
+                if target_index is None:
+                    print('Multiple targets found, using average score.')
+                    metric_ = list(metric_[0].values())[0]
+                else:
+                    metric_ = list(metric_[1].values())[0][target_index]
             fold_results.append(metric_)
         metric_result = np.average(fold_results)
         return metric_result

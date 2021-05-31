@@ -73,12 +73,14 @@ def hypopt_model(
         study_name=study_name, storage=study_db
     )
     study._storage = study._storage._backend
-    while true:
+    
+    trials_counted = 0
+    while trials_counted < trials_per_cpu:
         try:
-            study.optimize(objective, n_trials=trials_per_cpu)
-            break
-        execpt:
-            pass
+            study.optimize(objective, n_trials=1)
+            trials_counted +=1
+        except:
+            raise
     return 
 
 # E. Komp's code from Gandy Project Wi 2021

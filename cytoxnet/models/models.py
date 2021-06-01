@@ -443,7 +443,7 @@ for the task: {}'.format(model.mode)
             array_return={}
             for i, m in enumerate(metrics_):
                 mvals = []
-                for n, target in enumerate(self.tasks):
+                for n, target in enumerate(range(y.shape[1])):
                     if use_sample_weights:
                         mval = m(y[:,n], pred[:,n], sample_weight = dataset.w, **kwargs)
                     else:

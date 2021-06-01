@@ -337,7 +337,7 @@ for the task: {}'.format(model.mode)
                  untransform: bool = False,
                  per_task_metrics: bool = False,
                  use_sample_weights: bool = False,
-                 n_classes: int = None,
+                 n_classes: int = 2,
                  **kwargs) -> dict:
         """Evaluates the performance of this model on specified dataset.
 

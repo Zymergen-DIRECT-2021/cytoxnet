@@ -110,16 +110,16 @@ def binarize_targets(dataframe,
     else:
         value = subset.quantile(percentile).values
         
-    # get the Nan indexes
-    nans = dataframe_.isna()
+#     # get the Nan indexes
+#     nans = dataframe_.isna()
     # now mask the targets
     # this will fill over nan values (bad!)
     dataframe_[target_cols] = subset > value
     # maybe switch
     if not high_positive:
         dataframe_[target_cols] = ~dataframe_[target_cols]
-    # refill nans
-    dataframe_[nans] = np.nan
+#     # refill nans
+#     dataframe_[nans] = np.nan
     return dataframe_
 
 

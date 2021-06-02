@@ -445,7 +445,7 @@ for the task: {}'.format(model.mode)
                 mvals = []
                 for n, target in enumerate(range(y.shape[1])):
                     if use_sample_weights:
-                        mval = m(y[:,n], pred[:,n], sample_weight = dataset.w, **kwargs)
+                        mval = m(y[:,n], pred[:,n], sample_weight = dataset.w[:,n], **kwargs)
                     else:
                         mval = m(y[:,n], pred[:,n], **kwargs)
                     mvals.append(mval)

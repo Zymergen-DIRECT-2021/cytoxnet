@@ -59,11 +59,14 @@ def hypopt_model(
             model.fit(train, **fit_kwargs)
             metric_ = model.evaluate(val, [metric], untransform=True, **eval_kwargs)
             if type(metric_) == tuple:
+                print('Tuple: ', metric_)
                 if target_index is None:
                     print('Multiple targets found, using average score.')
                     metric_ = list(metric_[0].values())[0]
                 else:
                     metric_ = list(metric_[1].values())[0][target_index]
+            elif type(metric_) == dict:
+                metric_ = list(metric_.values())[0]
             fold_results.append(metric_)
         metric_result = np.average(fold_results)
         return metric_result

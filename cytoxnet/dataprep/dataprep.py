@@ -110,16 +110,15 @@ def binarize_targets(dataframe,
     else:
         value = subset.quantile(percentile).values
         
-#     # get the Nan indexes
-#     nans = dataframe_.isna()
+    # handle sparsity after values computed
+    if np.sum(dataframe.isna()[target_cols].values) > 0:
+        dataframe_ = handle_sparsity(dataframe_, y_col=target_cols)
+    
     # now mask the targets
-    # this will fill over nan values (bad!)
     dataframe_[target_cols] = subset > value
     # maybe switch
     if not high_positive:
         dataframe_[target_cols] = ~dataframe_[target_cols]
-#     # refill nans
-#     dataframe_[nans] = np.nan
     return dataframe_
 
 
@@ -151,7 +150,7 @@ def canonicalize_smiles(smiles, raise_error=False):
     return csmiles
 
 
-def handle_sparsity(dataset):
+def handle_sparsity(dataset, y_col=None, w_label='w'):
     """Prepares sparse data to be learned.
 
     Replace nans with 0.0 in the dataset targets so it can be input to a model,
@@ -160,20 +159,39 @@ def handle_sparsity(dataset):
 
     Parameters
     ----------
-    dataframe : dc.NumpyDataset
+    dataframe : dc.NumpyDataset or DataFrame
         The dataset with sparse targets.
+    y_col : list of str
+        The names of all columns containing the targets. (for df)
+    w_label : str
+        The string to add to the target names to create columns of weights in
+        the dataframe.
 
     Returns
     -------
     dataset
     """
-    X, y, w, i = (dataset.X, dataset.y, dataset.w, dataset.ids)
-    nans = np.isnan(y)
-    # w may be only a vector instead of shape of data
-    w = np.tile(w, y.shape[1]) 
-    w *= ~nans
-    y = np.nan_to_num(y)
-    dataset_out = dc.data.NumpyDataset(X, y, w, i)
+    if type(dataset) == dc.data.datasets.NumpyDataset:
+        X, y, w, i = (dataset.X, dataset.y, dataset.w, dataset.ids)
+        nans = np.isnan(y)
+        # w may be only a vector instead of shape of data
+        w = np.tile(w, y.shape[1]) 
+        w *= ~nans
+        y = np.nan_to_num(y)
+        dataset_out = dc.data.NumpyDataset(X, y, w, i)
+    elif type(dataset) == pd.core.frame.DataFrame:
+        dataset_out = dataset.copy()
+        if type(y_col) != list:
+            y_col = [y_col]
+        assert all([col in dataset.columns for col in y_col])
+        w_names = [w_label + '_' + target for target in y_col]
+        # compute weights based on presence of nan
+        dataset_out[w_names] = np.float64(
+            ~dataset_out[y_col].isnull().values
+        )
+        # It does not matter what value we replace the nans with as the weight is
+        # 0, but it has to be numeric to not break the models
+        dataset_out = dataset_out.fillna(0)
     return dataset_out
 
 

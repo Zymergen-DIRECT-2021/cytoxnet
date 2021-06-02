@@ -32,9 +32,7 @@ def test_pair_predict():
         model.transformers = [transformer]
         cytoxnet.models.analyze.pair_predict(
             model, dataset, untransform=True)
-        transformer.untransform.assert_called_with(
-            dataset.y
-        )
+        assert transformer.untransform.called
         # and task handling
         model.tasks = ['t1', 't2']
         with pytest.raises(AssertionError):

@@ -21,14 +21,31 @@ targets for transfer learning.
 ***
 ## `cytoxnet/data/`
 
-**Included Data**
-ChemBL Ecoli MIC
-Lunghini Algae EC50
-Lunghini Daphnia EC50
-Lunghini Fish LC50
-Lunghini Combined
-Zhu Rat LD50
-!!!! Temporary note-add citations and info!!!!
+### Included Data
+
+__ChemBL Ecoli MIC__
+- Ecoli MIC query from ChemBL
+- Nucleic Acids Res. 2019; 47(D1):D930-D940. doi: 10.1093/nar/gky1075
+- See dataset report in docs/data_reports/chembl_ecoli.ipynb for more detail
+
+__Lunghini__
+- Algae, daphnia, and fish data from Lunghini et al., 2020 
+- Lunghini, F, Marcou, G, Azam, P, Enrici, M.H, Van Miert, E, & Varnek, A. (2020). Consensus QSAR models estimating acute toxicity to aquatic organisms from different trophic levels: Algae, Daphnia and fish. SAR and QSAR in Environmental Research, 31(9), 655-675.
+- See dataset report in docs/data_reports/lunghini_ecotoxological.ipynb for more detail
+
+__Lunghini Algae EC50__
+- Only algae data from Lunghini et al, 2020
+
+__Lunghini Daphnia EC50__
+- Only daphnia data from Lunghini et al., 2020
+
+__Lunghini Fish LC50__
+- Only fish data from Lunghini et al., 2020
+
+__Zhu Rat LD50__
+- Rat LD50 data from Zhu et al., 2009
+- Zhu, Hao, et al. “Quantitative structure− activity relationship modeling of rat acute toxicity by oral exposure.” Chemical research in toxicology 22.12 (2009): 1913-1921.
+- See dataset report in docs/data_reports/zhu_rat.ipynb for more detail
 
 ## `cytoxnet/dataprep/`
 
@@ -51,7 +68,7 @@ load_data(datafile: str,
 create_compound_codex(db_path: str = './database',
                           id_col: str = 'smiles',
                           featurizers: str or list of str = None,
-                          **kwargs) --> compounds codex (compounds.csv)
+                          **kwargs) -> compounds codex (compounds.csv)
 ```
 - __Use Case__: (1)
 - __Optional Inputs__: Path to folder where dababase files will be located, default './database'. Column ID corresponding to compound identity, default 'smiles'. Desired featurizers to include in the initialized compounds codex, default None.
@@ -110,7 +127,7 @@ add_features(dataframe: df,
 
 ```
 convert_to_categorical(dataframe,
-                       cols: list of str = None) --> dataframe
+                       cols: list of str = None) -> dataframe
 ```
 - __Use Case__: (3)
 - __Inputs__: Dataframe and identification of columns to consider for categorical conversion (default None).
@@ -122,7 +139,7 @@ binarize_targets(dataframe,
                  target_cols: Union[str, List[str]],
                  high_positive: bool = False,
                  percentile: float = 0.5,
-                 value: Union[float, List[float]] = None) --> dataframe
+                 value: Union[float, List[float]] = None) -> dataframe
 ```
 - __Use Case__: (3)
 - __Inputs__: DataFrame with a target column(s) to be binarized. Name of the column to be binarized. 
@@ -142,7 +159,7 @@ canonicalize_smiles(smiles, raise_error=False)
 ```
 handle_sparsity(dataframe,
                     y_col: List[str],
-                    w_label: str = 'w') --> dataframe
+                    w_label: str = 'w') -> dataframe
 ```
 - __Use Case__: (3)
 - __Inputs__: A dataframe containing sparse targets and the corresponding columns containing the targets. 
@@ -156,7 +173,7 @@ convert_to_dataset(dataframe,
                    y_col: str = 'y',
                    w_col: str = None,
                    w_label: str = None,
-                   id_col: str = None) --> dataset
+                   id_col: str = None) -> dataset
 ```
 - __Use Case__: (3)
 - __Inputs__: A dataframe containing feature and target columns and their corresponding column name.
@@ -168,7 +185,7 @@ convert_to_dataset(dataframe,
 data_transformation(dataset,
                     transformations: list = ['NormalizationTransformer'],
                     to_transform: list = [],
-                    **kwargs) --> transformed dataset, transformer objects list
+                    **kwargs) -> transformed dataset, transformer objects list
 ```
 - __Use Case__: (3)
 - __Inputs__: A deepchem dataset object containing data. 
@@ -182,7 +199,7 @@ data_transformation(dataset,
 data_splitting(dataset,
                splitter: str = 'RandomSplitter',
                split_type: str = 'train_valid_test_split',
-               **kwargs) --> split dataset
+               **kwargs) -> split dataset
 ```
 - __Use Case__: (3)
 - __Inputs__: A deepchem dataset object containing data. 
@@ -235,10 +252,23 @@ ToxModel.evaluate(self,
                   n_classes: int = None,
                   **kwargs) -> dict
 ```
-- __Use Case__: Dataset object containing data. The metrics to calculate. 
-- __Optional Inputs__: Whether to untransform the the data (default False). Whether to use sample weights (default False). Number of classes (default None).
-- __Outputs__: Printout of list of models or details on a specific model. 
-- __Summary__: User exectues this method to get information on models and, if a specific model is passed, can get detailed information on that model.
+- __Use Case__: 
+- __Inputs__: DeepChem dataset object and list of desired metric(s). 
+- __Optional Inputs__: Whether to untransform the the data (default False). Whether to use sample weights (default False). Number of classes (default None, only used for classification). For multitask, option to specify whether to calculate a metric for every task in the multitask model. 
+- __Outputs__: A dictionary containing the metric score names and their corresponding values. Optinally, a dictionary containing the per-task metrics. 
+- __Summary__: The user inputs a DeepChem dataset object and a list of metrics they would like the method to compute. The function evaluates the models and returns a dictionary containing the metrics. If used for a multitask model, the method can also optionally return a dictionary of per-task metrics. 
+
+```
+ToxModel.visualize(self,
+                  viz_name: Union[str, object],
+                  dataset: Dataset,
+                  **kwargs) -> visual 
+```
+- __Use Case__: 
+- __Inputs__:  Name of the visualization function to use. A DeepChem dataset object with the data to be visualized.
+- __Optional Inputs__: Keyword arguments are passed to the visualization function. 
+- __Outputs__: A visualization of the passed data.
+- __Summary__: The user passes the DeepChem dataset they would like to vizualize and the function that they would like to use to do so. The method retreives the specified viasualization function and applies it to output the desired visual. 
 
 
 ```
@@ -251,38 +281,74 @@ ToxModel(model_name: str, *kwargs)
 Use cases 4.3+ and 6 are handled by model instance. See `deepchem.models.Model`.
 
 ```
-ToxModel.pretrain(dataset, fix: bool: False)
+ToxModel.pretrain(model: Model,
+                  dataset: Union[Dataset, str],
+                  **kwargs)
 ```
 - __Use Case__: (7)
-- __Inputs__: dataset to pretrain on
-- __Outputs__: Trained model with output ready for new target and potentially
-  fixed layers
+- __Inputs__: A model to be pretrained. DeepChem dataset to pretrain on or the string name of a dataset included in the package. 
+- __Optional Inputs__: Keyword arguments passed to the model. 
+- __Outputs__: Pretrained model with output ready for new target. 
+- __Summary__: The user passes a model type and a dataset to use to pretrain the model. The method returns the pretrained model. 
   
 ```
-ToxModel.transfer(dataset, fix: bool: False)
+ToxModel.transfer(model: Model,
+                  dataset: Dataset,
+                  **kwargs)
 ```
 - __Use Case__: (7)
-- __Inputs__: dataset to transfer to
-- __Outputs__: Trained model on new targets, with layers potentially fixed to
-  previous training.
+- __Inputs__: Model to conduct transfer learning on. Dataset with the task to transfer to. 
+- __Outputs__: The transferred model.
+- __Summary__: The user inputs a model to transfer on and a dataset to transfer to. The method fixes the already-learned inner layers of th model and trains the outer/pooling layers on the new task data. The new, transferred model is returned. 
   
 ### `cytoxnet/models/evaluate.py`
 
 ```
-HypOpt(model_name: str,
-       search_type: str,
-       searchable_params: dict,
-       fixed_params: dict)
+evaluate_crossval(datafile: Union[str, DataFrame],
+                  ml_model: str,
+                  feat_method: str,
+                  target: Union[str, List[str]],
+                  k: int = 5,
+                  codex: str = None,
+                  fit_kwargs: dict = {},
+                  binary_percentile=None,
+                  transformations=[],
+                  to_transform=['y'],
+                  **kwargs)
 ```
 - __Use Case__: (5)
-- __Inputs__: Model class type, hyperparameter search scheme and space
-- __Outputs__: Optimized model and best parameters
-  
+- __Inputs__: The file path, name in package, or dataframe to be used as the development set. The name of the ML model to test. The name of the deepchem featurizer to use. The column name corresponding to target(s) in the datafile.
+- __Optional Inputs__: Number of folds for cross-valization (default 5). Path to the compound codex containing molecule IDs and their corresponding features. Binary percentile value to pass to the binarize_targets function (see dataprep.py module). Transformations to perform on the data. List of data column(s) to transform. 
+- __Outputs__: Dictionary of metrics for corresponding feature type, model, and dataset. 
+- __Summary__: User passes the development dataset, the model type to test, the featurizer type to use, and the target column name(s). The function evaluates the R2 and MSE (for a regression task) or the jaccard and recall score (for classification) and returns them as a dictionary with metrics that correspond to a given model, dataset, and feature type. The user can avoid recomputation of features, if already calculated, by passing the compounds codex that contains the features. 
+
+```
+grid_evaluate_crossval(datafiles: List[Union[str, DataFrame]],
+                       ml_models: List[str],
+                       feat_methods: List[str],
+                       targets_codex: dict,
+                       k: int = 5,
+                       parallel: bool = True,
+                      **kwargs)
+```
+- __Use Case__: (5)
+- __Inputs__: List of file path(s), name(s) in package, or dataframe(s) to be used as the development set. The name(s) of ML models to test. The name(s) of featurizer(s) to use. Dictionary of target column/datafile pairs. 
+- __Optional Inputs__: Number of folds for cross-valization (default 5).  Keyword arguments passed to the evaluate_crossval function (see above)
+- __Outputs__: Dictionary of metrics for corresponding feature type, model, and dataset. 
+- __Summary__: User can pass multiple development datasets, model types, and featurizers to test. A dictionary of datafile/target column names is required. The function evaluates the R2 and MSE (for a regression task) or the jaccard and recall score (for classification) for all combinations of feature, model, and dataset, and returns them as a dictionary with metrics that correspond to a given model, dataset, and feature type. See evaluate_crossval function above for more details. 
+
+
+
 ### `cytoxnet/models/analyze.py`
 
 ```
-ModelAnalysis(tox_model, dataset)
+pair_predict(model: object,
+             dataset: Dataset,
+             task: str = None,
+             untransform: bool = True,
+             return_df: bool = False) -> Viz
 ```
 - __Use Case__: (8)
-- __Inputs__: Test dataset and a trained model
-- __Outputs__: Metrics and visuals of model performance.
+- __Inputs__: The ToxModel for the visualization. The testing dataset. 
+- __Optional Inputs__: The task to use for plotting, if multitask (default None). Whether or not to untransform the data (default True). Whether or not to return the dataframe containing predictions and true values (default False). 
+- __Outputs__: A pairwise regression prediction plot that plots the predicted values agains the true values and including an x=y line and a linear fit line. Optionally, also returns dataframe with corresponding true and predicted values. 

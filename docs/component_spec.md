@@ -70,7 +70,7 @@ create_compound_codex(db_path: str = './database',
                           featurizers: str or list of str = None,
                           **kwargs) -> compounds codex (compounds.csv)
 ```
-- __Use Case__: (1)
+- __Use Case__: (10, 11)
 - __Optional Inputs__: Path to folder where dababase files will be located, default './database'. Column ID corresponding to compound identity, default 'smiles'. Desired featurizers to include in the initialized compounds codex, default None.
 - __Outputs__: Does not return any variable, crates a compound codex at a specified location. 
 - __Summary__: All inputs are optional. By default, calling the function will create a folder or use the folder './database' and create a compounds.csv file at that location. The codex can be used to track canonicalized smiles and corresponding features.  
@@ -83,7 +83,7 @@ add_datasets(dataframes: df or str or list of df or str,
                  new_featurizers: str or list of str = None,
                  **kwargs) 
 ```
-- __Use Case__: (1)
+- __Use Case__: (10, 11)
 - __Inputs__: One or more datasets specified as path(s) to csv(s) or dataframe(s); can also specify names of the datasets that are already included in package data. Name(s) of the dataset(s) passed.
 - __Optional Inputs__: Column representing the identity of the compound in all datasets, default 'smiles'. The path to the folder where database files are located, default './database'. The new featurization methods that should be used to featurze the new, as well as existing data.
 - __Outputs__: Returns a dictionary of cleaned dataframes identified via corresponding dataset names. 
@@ -215,8 +215,9 @@ data_splitting(dataset,
 ```
 class ToxModel 
 ```
--__Parameters__: model_name, the name of the model type to initialize. transformers, data transformations to apply to output predictions (for untransforming the data to raw space).  tasks, names for the different targets (Default only one unnamed task). use_weights (default False), only relevant for sklearn models thats can accept weights for fitting. Keyword arguments are passed to the model type for initialization.
--__Methods__: details below 
+- __Use Case__: (4)
+- __Parameters__: model_name, the name of the model type to initialize. transformers, data transformations to apply to output predictions (for untransforming the data to raw space).  tasks, names for the different targets (Default only one unnamed task). use_weights (default False), only relevant for sklearn models thats can accept weights for fitting. Keyword arguments are passed to the model type for initialization.
+- __Methods__: details below 
 
 
 ```
@@ -237,7 +238,7 @@ ToxModel._import_model_type(model_name: str)
 ```
 ToxModel.help(model_name: str)
 ```
-- __Use Case__: (4.1)
+- __Use Case__: (4)
 - __Optional Inputs__: Model name (default None). 
 - __Outputs__: Printout of list of models or details on a specific model. 
 - __Summary__: User exectues this method to get information on models and, if a specific model is passed, can get detailed information on that model. 
@@ -252,7 +253,7 @@ ToxModel.evaluate(self,
                   n_classes: int = None,
                   **kwargs) -> dict
 ```
-- __Use Case__: 
+- __Use Case__: (4)
 - __Inputs__: DeepChem dataset object and list of desired metric(s). 
 - __Optional Inputs__: Whether to untransform the the data (default False). Whether to use sample weights (default False). Number of classes (default None, only used for classification). For multitask, option to specify whether to calculate a metric for every task in the multitask model. 
 - __Outputs__: A dictionary containing the metric score names and their corresponding values. Optinally, a dictionary containing the per-task metrics. 
@@ -264,7 +265,7 @@ ToxModel.visualize(self,
                   dataset: Dataset,
                   **kwargs) -> visual 
 ```
-- __Use Case__: 
+- __Use Case__: (8)
 - __Inputs__:  Name of the visualization function to use. A DeepChem dataset object with the data to be visualized.
 - __Optional Inputs__: Keyword arguments are passed to the visualization function. 
 - __Outputs__: A visualization of the passed data.
@@ -331,7 +332,7 @@ grid_evaluate_crossval(datafiles: List[Union[str, DataFrame]],
                        parallel: bool = True,
                       **kwargs)
 ```
-- __Use Case__: (5)
+- __Use Case__: (4, 5)
 - __Inputs__: List of file path(s), name(s) in package, or dataframe(s) to be used as the development set. The name(s) of ML models to test. The name(s) of featurizer(s) to use. Dictionary of target column/datafile pairs. 
 - __Optional Inputs__: Number of folds for cross-valization (default 5).  Keyword arguments passed to the evaluate_crossval function (see above)
 - __Outputs__: Dictionary of metrics for corresponding feature type, model, and dataset. 

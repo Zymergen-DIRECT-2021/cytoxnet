@@ -27,8 +27,6 @@ def table_creator(table_name, dataframe):
         column_names.append(column)
         column_types.append(dataframe[column].dtypes.name)
 
-    print(column_types)
-
     # remove 'id' and 'smiles' columns from dataframe
     # this will be important when creating the database table
     del column_names[0:2]
@@ -42,7 +40,6 @@ def table_creator(table_name, dataframe):
     # create new dictionary with column names as keys and sqlalchemy data
     # types a values
     header_info = dict(zip(column_names, column_sqlalchemy_types))
-    # print(header_info)
 
     # connect to cytoxnet database
     engine = create_engine('sqlite:///cytoxnet.db', echo=True)
@@ -58,7 +55,7 @@ def table_creator(table_name, dataframe):
         dtype=header_info)
 
 
-# def tables_to_database(dataframe_dict):
+def tables_to_database(dataframe_dict):
     """
     Calls 'table_creater' function to generate multiple SQL tables at once from a dictionary
     with table names as the keys and dataframe objects as the values.  Such a dictionary is
@@ -68,8 +65,8 @@ def table_creator(table_name, dataframe):
     ---------
     - dataframe_dict: dictionary with table names as keys and dataframe objects as values
     """
-
-    # call 'table_creater' function and iterate through dictionary
+    for k, v in dataframe_dict.items():
+        table_creator(k, v)
 
 
 def query_to_dataframe(tables, features_list=None):

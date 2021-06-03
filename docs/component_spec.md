@@ -122,64 +122,123 @@ binarize_targets(dataframe,
                  target_cols: Union[str, List[str]],
                  high_positive: bool = False,
                  percentile: float = 0.5,
-                 value: Union[float, List[float]] = None)
+                 value: Union[float, List[float]] = None) --> dataframe
 ```
 - __Use Case__: (3)
 - __Inputs__: DataFrame with a target column(s) to be binarized. Name of the column to be binarized. 
 - __Optional_Inputs__: Option to specify whether values above a threshold are True or False (default False, e.g. above the defined threshhold, values for toxicity are set to False to correspond to not toxic). A percentile value indicating the relative position of the threshold based on the distribution of the data, default 0.5. Value(s) to use as a threshold.
-- __Outputs__: 
-- __Summary__: 
+- __Outputs__: Dataframe containing the binarized data. 
+- __Summary__: The user inputs a dataframe containing continuous data to be binarized and the corresponding names of the column(s). The user can optionally specify a percentile value to define the threshold based on the distribution (default 0.5) or can specify a value as a threshold. The user can choose if values above the threshold are considered True or False (default is False, i.e. above the threshold values are False, corresponding to non-toxic). 
+
+```
+canonicalize_smiles(smiles, raise_error=False)
+```
+- __Use Case__: (3)
+- __Inputs__: A SMILES string. 
+- __Optional_Inputs__: Whether to raise an error if canonicalizing fails (by default nan is returned)
+- __Outputs__: Canonicalized smiles string.
+- __Summary__: The user inputs a SMILES string that they would like to canonicalize, the function does so and returns the canonicalized SMILES string. The user can optionally specify whether failing to canonicalize a SMILES string returns an error or a nan. 
+
+```
+handle_sparsity(dataframe,
+                    y_col: List[str],
+                    w_label: str = 'w') --> dataframe
+```
+- __Use Case__: (3)
+- __Inputs__: A dataframe containing sparse targets and the corresponding columns containing the targets. 
+- __Optional_Inputs__: A string to add to target column names for the new weights columns (defauilt '_w'). 
+- __Outputs__: DataFrame with target columns containing 0.0's in place of nans and with additional columns that have weights giving all the nan values weights of zero.
+- __Summary__: The user inputs a dataframe with sparse data and corresponding column names. The function replaces nans with 0.0 so that the data can be input into a machine learning model and creates correspond weight columns that contain zero weights for the values that were originally nans. The name of the weight columns is by default 'w' + target column name , or the user can specify the string. 
 
 ```
 convert_to_dataset(dataframe,
                    X_col: str = 'X',
                    y_col: str = 'y',
                    w_col: str = None,
-                   id_col: str = None)
+                   w_label: str = None,
+                   id_col: str = None) --> dataset
 ```
 - __Use Case__: (3)
-- __Inputs__: Dataframe, non default X and y columns
-- __Outputs__: deepchem dataset from dataframe
+- __Inputs__: A dataframe containing feature and target columns and their corresponding column name.
+- __Optional_Inputs__: Column names for X and Y (if not 'X' and 'y'). Name of weight column(s) (default None). Preceding label for weight columns (default None; see handle_sparsity function). The name of the column containing molecule identities. 
+- __Outputs__: DeepChem dataset containing the X and y data and IDs, if provided. 
+- __Summary__: The user passes a dataframe with at least feature and target columns and their corresponding column names. They can also choose to include and identify an ID column, if desired. The function converts the dataframe into a deepchem dataset object containing the passed data (and IDs, if passed) and returns the dataset object.
 
 ```
-preprocess(dataset,
-           transformations: list of str = ['NormTransform',],
-           splitter: str = 'RandomSplitter', **kwargs)
+data_transformation(dataset,
+                    transformations: list = ['NormalizationTransformer'],
+                    to_transform: list = [],
+                    **kwargs) --> transformed dataset, transformer objects list
 ```
 - __Use Case__: (3)
-- __Inputs__: Dataset and transformations to make.
-- __Outputs__: Dataset(s) preprocessed and ready for ml
+- __Inputs__: A deepchem dataset object containing data. 
+- __Optional_Inputs__: List of transformations to perform (default is only Normalization). List of elements to transform (i.e. 'X', 'y', or 'w'). Keyword arguments passed to the transformer object. 
+- __Outputs__: The transformed dataset. List of transformer objects containign transformation information. 
+- __Summary__: The user inputs a deepchem dataset object with data to be transformed and a list of desired transformations (default is just a normalization transformer). The function transforms the data by retreiving and applying the specified transformers from DeepChem and returns the transformed data as well as a list of the applied transform objects. 
+
+
 
 ```
-pipeline(datafile: str,
-         id_cols: list of str,
-         descriptor_cols: list of str,
-         target_cols: list of str,
-         **kwargs)
+data_splitting(dataset,
+               splitter: str = 'RandomSplitter',
+               split_type: str = 'train_valid_test_split',
+               **kwargs) --> split dataset
 ```
-- __Use Case__: (1,2,3)
-- __Inputs__: Datafile location, columns in question, keywords for pipeline.
-- __Outputs__: Dataset(s) preprocessed and ready for ml.
-
-### `cytoxnet/dataprep/analyze.py`
-
-```
-dataset_transferability(dataset1, dataset2)
-```
-- __Use Case__: (9)
-- __Inputs__: Datasets to be compared.
-- __Outputs__: Metrics and visuals of the transferability of dataset 1 to 2.
+- __Use Case__: (3)
+- __Inputs__: A deepchem dataset object containing data. 
+- __Optional_Inputs__: Desired splitter (default RandomSplitter). Desired split type (default train_valid_test_split). Keyword arguments passed to the splitter object. 
+- __Outputs__: A set of dataset objects split based on the input data and splitter information. 
+- __Summary__: The user passes a DeepChem dataset object containing data to be split and specifies the type of splitter and split type. The function retrieves and applies the specified splitter from DeepChem and returns the split dataset. 
 
 ## `cytoxnet/models/`
 
+
 ### `cytoxnet/models/models.py`
+
+```
+class ToxModel 
+```
+-__Parameters__: model_name, the name of the model type to initialize. transformers, data transformations to apply to output predictions (for untransforming the data to raw space).  tasks, names for the different targets (Default only one unnamed task). use_weights (default False), only relevant for sklearn models thats can accept weights for fitting. Keyword arguments are passed to the model type for initialization.
+-__Methods__: details below 
+
+
+```
+ToxModel._check_model_avail(model_name: str)
+```
+- __Inputs__: A model name. 
+- __Outputs__: Prints out a statement including available models if the specified model is not available. 
+- __Summary__: The user passes a model name and the method and the function prints information on available models if the model is not available. 
+
+```
+ToxModel._import_model_type(model_name: str)
+```
+- __Inputs__: A model name. 
+- __Outputs__: A model class corresponding to the input model type. 
+- __Summary__:  The user specifies the type of model and the function retreives and returns the corresponding model class. 
+
 
 ```
 ToxModel.help(model_name: str)
 ```
 - __Use Case__: (4.1)
-- __Inputs__: Model name, model method or None
-- __Outputs__: Printout of help on model, model method, or available models.
+- __Optional Inputs__: Model name (default None). 
+- __Outputs__: Printout of list of models or details on a specific model. 
+- __Summary__: User exectues this method to get information on models and, if a specific model is passed, can get detailed information on that model. 
+
+```
+ToxModel.evaluate(self,
+                  dataset: Dataset,
+                  metrics: List[Union[str, Metric]],
+                  untransform: bool = False,
+                  per_task_metrics: bool = False,
+                  use_sample_weights: bool = False,
+                  n_classes: int = None,
+                  **kwargs) -> dict
+```
+- __Use Case__: Dataset object containing data. The metrics to calculate. 
+- __Optional Inputs__: Whether to untransform the the data (default False). Whether to use sample weights (default False). Number of classes (default None).
+- __Outputs__: Printout of list of models or details on a specific model. 
+- __Summary__: User exectues this method to get information on models and, if a specific model is passed, can get detailed information on that model.
 
 
 ```
@@ -207,7 +266,7 @@ ToxModel.transfer(dataset, fix: bool: False)
 - __Outputs__: Trained model on new targets, with layers potentially fixed to
   previous training.
   
-### `cytoxnet/models/opt.py`
+### `cytoxnet/models/evaluate.py`
 
 ```
 HypOpt(model_name: str,

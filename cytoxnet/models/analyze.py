@@ -64,9 +64,13 @@ def pair_predict(model: object,
     if untransform:
         assert hasattr(model, 'transformers'),\
             "untransform specified but the model has no transformers"
+        X = dataset.X
         y = dataset.y
         for trans in model.transformers:
-            y = trans.untransform(y)
+            if trans.transform_y:
+                y = trans.untransform(y)
+            if trans.transform_X:
+                X = trans.untransform(X)
     else:
         y = dataset.y
     y = np.vstack(y)

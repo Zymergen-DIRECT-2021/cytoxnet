@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 # working directory
+
+# data - must be forced
+*.csv

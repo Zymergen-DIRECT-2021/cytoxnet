@@ -165,7 +165,7 @@ def test_data_transformation(sample_data):
     transformed_data, transformer_list = dataprep.data_transformation(
         dataset=dataset, transformations=[
             'NormalizationTransformer', 'MinMaxTransformer'
-        ], to_transform=['X'])
+        ], to_transform=['X', 'y'])
 
     assert all(
         [isinstance(

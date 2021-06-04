@@ -30,6 +30,6 @@ df = ev.grid_evaluate_crossval(
     targets_codex,
     parallel=True,
     transformations=['NormalizationTransformer'],
-    codex='database/compounds.csv'
+    codex='../database/compounds.csv'
 )
 df.to_csv('regression_grid_results.csv')

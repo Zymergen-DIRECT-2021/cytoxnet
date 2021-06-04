@@ -337,7 +337,7 @@ for the task: {}'.format(model.mode)
                  untransform: bool = False,
                  per_task_metrics: bool = False,
                  use_sample_weights: bool = False,
-                 n_classes: int = None,
+                 n_classes: int = 2,
                  **kwargs) -> dict:
         """Evaluates the performance of this model on specified dataset.
 
@@ -399,13 +399,63 @@ for the task: {}'.format(model.mode)
                     )
                 )
             metrics_.append(metric_)
+        try:
+            returns = self.model.evaluate(dataset,
+                                          metrics=metrics_,
+                                          transformers=transformers,
+                                          per_task_metrics=per_task_metrics,
+                                          use_sample_weights=use_sample_weights,
+                                          n_classes=n_classes, **kwargs)
+        # fall back to more manual loop - sometimes the above breaks due to deepchem
+        except:
+            pred = self.predict(dataset)
+            y = dataset.y
+            if pred.size != y.size:
+                # different sizes, likely due to probabilities being returned
+                for i, dimsize in enumerate(pred.shape):
+                    if dimsize not in y.shape:
+                        if dimsize == n_classes:
+                            dim = i
+                            break
+                        else:
+                            raise ValueError(
+                                f'Found prediction shape not matching y shape.\
+ Assumed predictions are probabilities, but the probability axis size\
+  ({dimsize}) did not match the number of classes ({n_classes})'
+                            )
+                pred = numpy.atleast_2d(numpy.argmax(pred, axis=dim))
+                # reshape array
+                assert all([dimsize in y.shape for dimsize in pred.shape])
+                # get axis positions of pred array in y array
+                # and reorder axis to be the same shape
+                predshape = numpy.array(pred.shape)
+                yshape = numpy.array(y.shape)
+                predindex = numpy.argsort(predshape)
+                sorted_predshape = predshape[predindex]
+                sorted_predindex = numpy.searchsorted(sorted_predshape, yshape)
+                
+                pred_newindex = numpy.take(
+                    predindex, sorted_predindex, mode="clip"
+                )
+                pred = numpy.moveaxis(pred, range(len(pred.shape)), pred_newindex)
+            
+            av_return={}
+            array_return={}
+            for i, m in enumerate(metrics_):
+                mvals = []
+                for n, target in enumerate(range(y.shape[1])):
+                    if use_sample_weights:
+                        mval = m(y[:,n], pred[:,n], sample_weight = dataset.w[:,n], **kwargs)
+                    else:
+                        mval = m(y[:,n], pred[:,n], **kwargs)
+                    mvals.append(mval)
+                array_return[i] = mvals
+                av_return[i] = numpy.average(mvals)
+            if per_task_metrics:
+                returns = (av_return, array_return)
+            else:
+                returns = av_return
 
-        returns = self.model.evaluate(dataset,
-                                      metrics=metrics_,
-                                      transformers=transformers,
-                                      per_task_metrics=per_task_metrics,
-                                      use_sample_weights=use_sample_weights,
-                                      n_classes=n_classes, **kwargs)
         return returns
 
     def visualize(self,

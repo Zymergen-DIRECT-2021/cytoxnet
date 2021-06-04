@@ -190,7 +190,7 @@ class TestToxModel:
                                                   metrics=[func],
                                                   per_task_metrics=False,
                                                   use_sample_weights=False,
-                                                  n_classes=None)
+                                                  n_classes=2)
         return
 
     def test_visualize(self):

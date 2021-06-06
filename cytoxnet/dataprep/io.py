@@ -25,9 +25,9 @@ def load_data(file,
     Parameters
     ----------
     datafile: the file containing the data to be loaded
-    cols: Columns in the csv to keep, default None (keep all)
+    cols: Columns in the csv to drop, default None (keep all)
     id_cols: the column (names?numbers?either?) that the user wants to
-        use to handle duplicates and nana(ie remove any duplicates based on
+        use to handle duplicates and nans(ie remove any duplicates based on
         the inputted column id) or a list of them, default=None
     duplicates: how to handle duplicates in the id_cols. Options:
         'drop' - drop any duplicates, retaining the first instance
@@ -107,7 +107,7 @@ def create_compound_codex(db_path='./database',
     Create a compound codex for a combined database.
 
     Creates a master csv file that tracks the unique canonicalized smiles of
-    all data in the database, and stores deatures for those data.
+    all data in the database, and stores features for those data.
 
     Parameters
     ----------
@@ -149,6 +149,8 @@ def add_datasets(dataframes,
     dataframes : dataframe or string or list of them
         The datasets to add. If it is a string object, we will attempt to load
         the file at the string path or a file in the package data.
+    names : str or list of str
+        Names of the datasets passed. 
     id_col : str
         The column in all dataframes representing the compound id
     db_path : str

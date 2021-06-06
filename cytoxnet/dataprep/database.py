@@ -1,3 +1,10 @@
+import sqlite3
+import sqlalchemy
+from sqlalchemy import Table, Column, ForeignKey, Integer, String, Float, Boolean, DateTime, Interval, MetaData, create_engine, select, and_, join, union
+import pandas as pd
+import os
+
+
 def drop_table(table_name):
     """
     Connects to cytoxnet.db database using sqlite and drops any
@@ -8,20 +15,22 @@ def drop_table(table_name):
     - table_name: str of name assigned to table to drop.
     """
 
-    #Connecting to sqlite
+    # Connecting to sqlite
     conn = sqlite3.connect('cytoxnet.db')
 
-    #Creating a cursor object using the cursor() method
+    # Creating a cursor object using the cursor() method
     cursor = conn.cursor()
 
-    #Doping EMPLOYEE table if already exists
-    cursor.execute("DROP TABLE IF EXISTS "+table_name)
+    # Doping EMPLOYEE table if already exists
+    cursor.execute("DROP TABLE IF EXISTS " + table_name)
 
-    #Commit your changes in the database
+    # Commit your changes in the database
     conn.commit()
 
-    #Closing the connection
+    # Closing the connection
     conn.close()
+
+    return
 
 
 def table_creator(table_name, dataframe, codex=False, id_col=None):
@@ -36,28 +45,28 @@ def table_creator(table_name, dataframe, codex=False, id_col=None):
     - codex: bool True if input dataframe is the compounds codex, otherwise False
     - id_col: int position of id column if exists
     """
-    
+
     # reformat column names
-    dataframe.columns= dataframe.columns.str.lower()
+    dataframe.columns = dataframe.columns.str.lower()
     dataframe.columns = dataframe.columns.str.replace(' ', '_')
-    
+
     # insert 'ids' column at the first column position
-    if codex == True:
+    if codex:
         id_col_name_str = dataframe.columns[0]
-        dataframe.rename(columns = {id_col_name_str:'ids'}, inplace = True)
-    elif id_col != None:
+        dataframe.rename(columns={id_col_name_str: 'ids'}, inplace=True)
+    elif id_col is not None:
         id_col_name_str = dataframe.columns[id_col]
         ids = dataframe.pop(id_col_name_str)
         dataframe.insert(0, 'ids', ids)
     else:
         dataframe.insert(0, 'ids', range(0, len(dataframe)))
-    
+
     # shift column 'smiles' to second position
     second_column = dataframe.pop('smiles')
-    
+
     # insert column using insert(position,column_name, first_column) function
     dataframe.insert(1, 'smiles', second_column)
-    
+
     # dictionary to convert  between pandas dtypes and sqlalchemy dtypes
     data_types = {
         'object': String,
@@ -76,14 +85,13 @@ def table_creator(table_name, dataframe, codex=False, id_col=None):
         column_names.append(column)
         column_types.append(dataframe[column].dtypes.name)
 
-
     # remove 'id' and 'smiles' columns from dataframe
     # this will be important when creating the database table
     del column_names[0:2]
     del column_types[0:2]
-    
+
     # also remove 'foreign_key' column from dataframe
-    if codex != True:
+    if not codex:
         del column_names[-1]
         del column_types[-1]
     else:
@@ -97,47 +105,62 @@ def table_creator(table_name, dataframe, codex=False, id_col=None):
     # create new dictionary with column names as keys and sqlalchemy data
     # types a values
     header_info = dict(zip(column_names, column_sqlalchemy_types))
-    
+
     column_statements = []
     for column_name, column_type in header_info.items():
         column_statement = Column(column_name, column_type)
         column_statements.append(column_statement)
 
-    # drop tables if they already exist within the database to prevent UNIQUE conflicts
+    # drop tables if they already exist within the database to prevent UNIQUE
+    # conflicts
     drop_table(table_name)
-    
+
     # connect to cytoxnet database
     engine = create_engine('sqlite:///cytoxnet.db', echo=True)
     engine.connect()
     meta = MetaData()
-    
-    if codex != True:
-        
-        compounds = Table('compounds', meta, autoload=True, autoload_with=engine)
-        
-        new_table = Table(table_name, meta,
-                          Column('ids', Integer, primary_key=True),
-                          Column('smiles', String),
-                          *column_statements,
-                          Column('foreign_key', Integer, ForeignKey('compounds.ids')))
-        
+
+    if not codex:
+
+        compounds = Table(
+            'compounds',
+            meta,
+            autoload=True,
+            autoload_with=engine)
+
+        new_table = Table(
+            table_name,
+            meta,
+            Column(
+                'ids',
+                Integer,
+                primary_key=True),
+            Column(
+                'smiles',
+                String),
+            *column_statements,
+            Column(
+                'foreign_key',
+                Integer,
+                ForeignKey('compounds.ids')))
+
     else:
-        
+
         codex_table = Table(table_name, meta,
                             Column('ids', Integer, primary_key=True),
                             Column('smiles', String),
                             *column_statements)
-    
-    # create table to sqlite 
+
+    # create table to sqlite
     meta.create_all(engine)
-    
+
     # create SQL table from dataframe
     dataframe.to_sql(
         name=str(table_name),
         con=engine,
         if_exists='append',
         index=False)
-    
+
     return
 
 
@@ -161,14 +184,23 @@ def tables_to_database(dataframe_dict):
             table_creator(table_name=k, dataframe=v, codex=False, id_col=index)
         else:
             table_creator(table_name=k, dataframe=v, codex=False, id_col=None)
-        
+
     return
 
 
 def query_to_dataframe(tables, features_list=None):
     """
     Queryies selected tables within cytoxnet database, returning all columns from selected
-    tables as well as the smiles
+    tables as well as the smiles.
+
+    Parameters
+    ----------
+    tables: list or str of table names to include in query
+    features_list: list or str of features to include in query
+
+    Returns
+    -------
+    dataframe: dataframe object represented query result
     """
     # connect to cytoxnet database
     engine = create_engine('sqlite:///cytoxnet.db', echo=False)

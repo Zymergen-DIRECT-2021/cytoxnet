@@ -27,7 +27,7 @@ Toxicity metrics in the top 90% of values were labeled toxic, and the remaining 
 | baseline RFC single task | 0.906 |
 | mean imputed RFC multitask | 0.454 |
 | interpolated RFC multitask | 0.477 |
-| graph CNN multitask with sparse weights | 0.982 |
+| graph CNN multitask with sparse weights | 0.919 |
 
 Imputation is detrimental in the classification case: imputed values are all toxic (in the case of mean) and mostly toxic (in the case of interpolated) thus increaseing the dataset bias towards toxic even further. Multitask GCNNs with sparse weights actually improve on the random forest single task baseline, indicating that it is possible to leverage larger extra-sepcies datasets to improve accuracy.
 

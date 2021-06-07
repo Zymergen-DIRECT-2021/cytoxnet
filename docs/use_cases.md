@@ -76,7 +76,7 @@ for transfer learning.
     - __Returns__: Metrics and Visuals
     
 9. <span style="color:blue">Evaluate transferability of datasets</span>
-    - *Evaluates overlap of datasets. *
+    - *Evaluates overlap of datasets.*
     - __User__: Provides two datasets with uniform featurization.
     - __Returns__: Metrics and Visuals
 
@@ -89,3 +89,8 @@ for transfer learning.
     - *Augment a small user dataset with data from the resource pool.*
     - __User__: Provides a dataset of compounds and desired targets.
     - __Returns__: Dataset with new targets and compounds added.
+
+12. <span style="color:blue">Build and manage data within database schema</span>
+    - *Create and automatically update relational database of package and user data.*
+    - __User__: Provides new datasets with compounds, targets, and activity values.
+    - __Returns__: Relational database with tables for each dataset added.

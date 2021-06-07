@@ -12,6 +12,7 @@ targets for transfer learning.
 | |-io.py
 | |-featurize.py
 | |-dataprep.py
+| |-database.py
 |-/models
 | |-models.py
 | |-evaluate.py
@@ -205,7 +206,47 @@ data_splitting(dataset,
 - __Inputs__: A deepchem dataset object containing data. 
 - __Optional_Inputs__: Desired splitter (default RandomSplitter). Desired split type (default train_valid_test_split). Keyword arguments passed to the splitter object. 
 - __Outputs__: A set of dataset objects split based on the input data and splitter information. 
-- __Summary__: The user passes a DeepChem dataset object containing data to be split and specifies the type of splitter and split type. The function retrieves and applies the specified splitter from DeepChem and returns the split dataset. 
+- __Summary__: The user passes a DeepChem dataset object containing data to be split and specifies the type of splitter and split type. The function retrieves and applies the specified splitter from DeepChem and returns the split dataset.
+
+###`cytoxnet/dataprep/database.py` 
+
+```
+def drop_table(table_name: str) -> removes table from cytoxnet.db schema
+```
+- __Use Case__: (12)
+- __Inputs__: Name of table to be dropped from SQLite database.
+- __Outputs__: Drops table from SQLite database schema.
+- __Summary__: Called by user or other function to drop a table of a given name if it exists in the cytoxnet.db schema.
+
+```
+table_creator(table_name: str, 
+              dataframe, 
+              codex: bool = False, 
+              id_col: int = None) -> creates new database table from dataframe object
+```
+- __Use Case__: (10, 12)
+- __Inputs__: Name to be given to new table. Dataframe object used to create new table.
+- __Optional_Inputs__: True or False statement indicating whether the table being created/dataframe being input is the compound codex (see `cytoxnet.dataprep.io.create_compound_codex` function).  Integer specifying the position of an 'id' column (ie, column containing a unique int value for every row) if one exists.
+- __Outputs__: New table within cytoxnet.db, with 'ids' column set as primary key and a foreign key linking each tuple to a tuple within the compounds codex table.
+- __Summary__: User inputs the name of a table and a dataframe, and a table will be created (or updated if the specified table already exists) based on the input dataframe.
+
+```
+def tables_to_database(dataframe_dict) -> creates new database tables from dictionary of table names and dataframes
+```
+- __Use Case__: (10, 12)
+- __Inputs__: Dictionary with names to be given to new tables as the keys, and dataframe objects used to create new tables as the values.
+- __Outputs__: New tables within cytoxnet.db, with 'ids' columns set as primary keys and a foreign keys relating the tables to the compounds codex table.
+- __Summary__: User inputs a dictionary object with names and dataframes, and for each name-dataframe pair, the `table_creator` function is called.
+
+```
+def query_to_dataframe(tables: str or list of str, 
+                       features_list: str or list of str = None) -> creates new database table from dataframe object
+```
+- __Use Case__: (10, 12)
+- __Inputs__: Name of table or tables to be included in query.
+- __Optional_Inputs__: Name of stored feature type or types to include in the query.
+- __Outputs__: Dataframe object based on the relational table generated from the query, containing all target, activity, compound, and (if specified) feature data from specified tables.
+- __Summary__: User inputs the tables from which data is to be pulled, and a query is performed, retrieving all critical data from the specified datasets in the form of a dataframe object.
 
 ## `cytoxnet/models/`
 

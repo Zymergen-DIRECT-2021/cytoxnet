@@ -11,7 +11,7 @@ A few datasets were identified as potentially useful, formated and included in t
 Three datasets containing 5 species were identified for the investigation:
 
 ChemBL E. coli:
-> https://www.ebi.ac.uk/chembl/. Query details - XXXXXXXXX
+> https://www.ebi.ac.uk/chembl/. Query details - Query performed on website. Escherichia coli selected as target organism.  Compound activity selected.  Results narrowed down by specifying MIC as desired activity and ug/mL as desired units.  Results were downloaded as a CSV file and cleaned, log transformed.
 
 Contains 5217 MIC datum from a number of sources for E. coli. Data is logged and is stored units of MIC \[log(ug/mL)\].
 

@@ -52,7 +52,7 @@ Consult README files in folders for full contents and details.
 
 ## codeflow
 
-![codeflow]('/docs/images/codeflow.png')
+![codeflow]('docs/images/codeflow.png')
 
 ## Datasets
 Included in the package and needed for our exploratory evaluation is toxicity data from multiple species. See `/docs/data_reports` for more information. The references for these datasets are below:

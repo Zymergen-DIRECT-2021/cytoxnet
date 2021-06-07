@@ -287,6 +287,11 @@ def data_transformation(dataset,
     - transformed dataset
     - list of transformer objects
     """
+    if type(transformations) == str:
+        transformations = [transformations]
+    elif type(transformations) == list:
+        if len(transformations) == 0:
+            return dataset, []
     if to_transform is not None:
         if type(to_transform) == str:
             to_transform = [to_transform]*len(transformations)

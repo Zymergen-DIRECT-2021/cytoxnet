@@ -17,13 +17,65 @@ def hypopt_model(
     target_index: int = None,
     study_db: str = "sqlite:///optimization.db",
     transformations: list = [],
-    metric: list = 'r2_score',
+    metric: str = 'r2_score',
     cv: int = 5,
     trials_per_cpu: int = 10,
     model_kwargs: dict = {},
     fit_kwargs: dict = {},
     eval_kwargs: dict = {}
 ):
+    """
+    Optimize a specified ToxModel by name over hyperperameter space.
+    
+    For a ToxModel and a development dataset, search for the best
+    hyperparameter set over a specified search window. Optimizing for
+    a specified metric. Uses cross validation. Can be run multiple times,
+    on multiple cpus by simply executing the function again on each worker.
+    `mpirun` is a quick solution to scatter to many workers.
+    
+    Parameters
+    ----------
+    model_name : str
+        Name of ToxModel type under investigation
+    dev_set : deepchem.data.NumpyDataset
+        Dataset used for searching for the best parameters.
+    search_space : dict of hyperparameter name: search space
+        The form of values in the dict determines how the hyperparameter is
+        sampled.
+        Options -
+            list -> options to choose from uniformly
+            tuple of int -> sample integers in
+                (low, high, step[optional, d=1])
+            tuple of float -> sample floats in
+                (low, high, distribution[optional, d='uniform'])
+                distribution options :
+                    'uniform' -> uniform continuous
+                    'loguniform' -> loguniform continuous
+                    float -> uniform discrete\
+    study_name : str
+        The name of the study stored in the study database to commit trials to.
+    target_index : int
+        If the target is multindex, and per_task_metric is passed to evaluate
+        keywords, must be specified to determine which target is to be
+        optimized to.
+    study_db : str
+        The storage database containing the study to save optimization to.
+    transformations : list of :obj:deepchem.transformations
+        The transformations applied to the data to be reveresed for eval
+    metric : str
+        Metric name in deepchem to use for evaluation
+    cv : int
+        Number of folds to conduct cross validation for.
+    trials_per_cpu : int
+        Number of trials to run whenever the function is executed, on each cpu.
+    model_kwargs : dict
+        Keyword arguments passed to model init NOT searched over in
+        search_space
+    fit_kwargs : dict
+        Keyword arguments passed to the fit method
+    eval_kwargs : dict
+        Keyword arguments passed to the evaluate method.
+    """
     # check no overlap between fixed hparams and search space
     assert not np.any(np.isin(
         np.array(search_space.keys()),

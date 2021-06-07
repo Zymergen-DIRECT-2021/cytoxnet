@@ -10,7 +10,7 @@ import pandas as pd
 import cytoxnet.dataprep.dataprep as dp
 
 
-def molstr_to_Mol(dataframe, id_col='InChI String'):
+def molstr_to_Mol(dataframe, id_col='smiles'):
     """
     Converts DataFrame column containing the string representations of
     molecules and add a corresponding column of Mol objects.
@@ -46,9 +46,11 @@ def molstr_to_Mol(dataframe, id_col='InChI String'):
 
 
 def from_np_array(array_string):
-    """Convert a string to numpy array.
+    """
+    Convert a string to numpy array.
 
     Used for loading string arrays in pandas dataframes.
+    
     """
     try:
         array_string = re.sub('\\[\\s*', '[', array_string)
@@ -67,23 +69,16 @@ def add_features(dataframe,
                  drop_na=True,
                  **kwargs):
     """
-    Featurizes a set of Mol objects using the desired feturization method.
-
-    note: may want to change setup of parameters here
-    note: may be better suited as a class
-    note: might not need separate featurizer for graph featurization-
-    could include here I think
-
-    list of possible featurizers to wrap up here:
-    https://deepchem.readthedocs.io/en/latest/api_reference/featurizers.html
+    Featurizes a set of compounds using the desired feturization method.
 
     Parameters
     ----------
-    dataframe: a DataFrame containing a column with Mol objects-
-    may want to play around with how we want to input the set of Mols
-    for featurization
-    id_col: label of the column containing the Mol objects, default based
-    on function for adding a Mol column
+    dataframe: a DataFrame containing a column with compound 
+        string representations for featurization
+    id_col: label of the column containing the string representation, 
+        default 'smiles'
+    method: str
+        featurization method 
     codex : str
         path to the codex containing smiles and features
     canonicalize : bool
@@ -95,6 +90,11 @@ def add_features(dataframe,
     -------
     DataFrame containing a column of the featurized representation of the Mol
     object with the featurization method as the column ID
+    
+    Notes
+    -----
+    See following link for featurization method options and details:
+    https://deepchem.readthedocs.io/en/latest/api_reference/featurizers.html
 
     """
     dataframe = dataframe.copy()

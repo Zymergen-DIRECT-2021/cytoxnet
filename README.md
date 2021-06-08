@@ -44,6 +44,7 @@ Consult README files in folders for full contents and details.
 `|-using_ToxModels.ipynb`                 # initializing, training, and evaluating models
 `|-hyperparameter_optimization.ipynb`     # finding best hyperparameters for a task
 `|-loading_&_updating_data.ipynb`         # accessing database created after data cleaning
+`|-preparing_data_for_learning.ipynb`     # tools for getting raw data into machine learning format
 `environment.yml`                         # the conda package requirements
 `LICENSE`                                 # License file
 `MANIFEST.in`                             # defines package data to be included

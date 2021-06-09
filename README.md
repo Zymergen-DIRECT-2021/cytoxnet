@@ -87,9 +87,18 @@ For the exploration itself, given the largest need for cross-species learning in
 We first screen model types for regression (LASSO, GPR, RFR, GCNN) and classification (GPC, RFC, KNNC, GCNN) along with featurization techniques for the molecules such as Mordred descriptors and Circular Fingerprints for the most promising models. We then conduct extensive hyperparemeter optimization for a small set of promising model/feature combinations. Continuous variables were binarized by considering the dataset distribution for classification tasks. The optimized models, including both baseline single task algae models and exploratory multitask and transfer learning models, were finally compared on predictive power on the independent algae test set.
 
 ## Results
-We chose datasets in literature emphasizing a wide range of species, while also trying to avoid unclean or inconsistent datasets, which is not always possible. For example, a ChemBL query for E. coli was included to give representation to microbes, but the contained data is imprecise, reporting MIC values at defined intervals, and is also in some cases right censored. Each dataset investigated had a fairly severe bias towards toxic compounds. See Figure 1 below (<span style='color:red'>unlogged histogram to show bias</span>) Taking the logarithm of the toxicity produces a more normal distribution lending itself to learning, howver does not remove the bias, see Figure 2 (<span style='color:red'>logged histogram</span>). Because of this, we expect models to be more capable of predicting in the toxic regime, though this is not necessarily desired. Investigation of the overlap of the 5 target datasets using UMAP dimensionality reduction of the molecules shows that the microbe (E. Coli) data generally has much less overlap than the other targets, which we postulate is a big contributor to poor cross-species learning performance. See Figure 3 Below (<span style='color:red'>umap overlap</span>)
+We chose datasets in literature emphasizing a wide range of species, while also trying to avoid unclean or inconsistent datasets, which is not always possible. For example, a ChemBL query for E. coli was included to give representation to microbes, but the contained data is imprecise, reporting MIC values at defined intervals, and is also in some cases right censored. Each dataset investigated had a fairly severe bias towards toxic compounds. See Figure 1 below. Taking the logarithm of the toxicity produces a more normal distribution lending itself to learning, however does not remove the bias (Fig. 1).
 
-Screening of models and features pointed towards molecular descriptors such as RDKitDescriptors paired with Random Forests, as well as graph convolutional neural networks being top performers. See Figure 4 below (<span style='color:red'>screening results</span>)
+
+![figure1](./docs/images/fig_1_bias.png)
+
+Because of the bias in the data, we expect models to be more capable of predicting in the toxic regime, though this is not necessarily desired. Investigation of the overlap of the 5 target datasets using UMAP dimensionality reduction of the molecules shows that the microbe (E. Coli) data generally has much less overlap than the other targets, which we postulate is a big contributor to poor cross-species learning performance. See Figure 2 below.
+
+![figure2](./docs/images/fig_2_umap_overlap.png)
+
+Screening of models and features pointed towards molecular descriptors such as RDKitDescriptors paired with Random Forests, as well as graph convolutional neural networks being top performers. See Figure 3 below.
+
+![figure3](./docs/images/fig_3_reg_mse.png)
 
 As a baseline, single target (algea) random forest and graph neural nets were used. Multitask (all 5 targets) random forest and graph models were compared to these. For each model testd, extensive hyperparameter optimization using the Klone high performance computing cluster and the TPE hyperparameter sampling method was conducted using the development dataset.
 

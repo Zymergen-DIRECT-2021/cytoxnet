@@ -14,6 +14,8 @@ import altair as alt
 import deepchem.data
 import numpy as np
 import pandas
+import deepchem.models
+import sklearn.metrics
 
 Dataset = Type[deepchem.data.Dataset]
 Viz = Type[alt.Chart]
@@ -113,6 +115,64 @@ def pair_predict(model: object,
         alt.Y(yl + ':Q')
     )
     chart = chart + line
+    if return_df:
+        return chart, df
+    else:
+        return chart
+
+def roc(model: object,
+        dataset: Dataset,
+        task: str = None,
+        return_df: bool = False) -> Viz:
+    
+    preds_raw = model.predict(dataset)
+    if len(model.tasks) == 1:
+        task = model.tasks[0]
+    # handle probabilities returns
+    if len(preds_raw.shape) > 2:
+        assert task is not None, 'Multitask model but no tasks passed'
+        preds = np.argmax(preds_raw, axis=2)
+    elif len(preds_raw.shape) == 2:
+        preds = np.argmax(preds_raw, axis=1)
+    else:
+        preds = preds_raw
+    preds = np.atleast_2d(preds)
+    
+    # handle tasks
+    df = pandas.DataFrame()
+    for i, task_ in enumerate(model.tasks):
+        df[task_ + ': true'] = dataset.y[:, i]
+        if isinstance(model.model, deepchem.models.SklearnModel):
+            df[task_ + ': predicted'] = preds[i, :]
+        else:
+            df[task_ + ': predicted'] = preds[:, i]
+    
+    taskind = np.where(model.tasks == task)[0]
+    
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(
+        df[task + ': true'], df[task + ': predicted']
+    )    
+    roc_df = pandas.DataFrame()
+    roc_df['fpr'] = fpr
+    roc_df['tpr'] = tpr
+    roc_df['thresholds'] = thresholds
+        
+        
+    chart = alt.Chart(roc_df).mark_area(
+        fillOpacity = 0.5, fill = 'red').encode(
+            alt.X('fpr', title="false positive rate"),
+            alt.Y('tpr', title="true positive rate")
+        )
+    line =  alt.Chart(pandas.DataFrame({'line': [0,1]})).mark_line(
+        strokeDash=[20,5], color = 'black'
+    ).encode(
+        alt.X('line', title="false positive rate",
+              scale = alt.Scale(domain=[0.0, 1.0])),
+        alt.Y('line', title="true positive rate",
+              scale = alt.Scale(domain=[0.0, 1.0])))
+    chart = line + chart
+    chart.properties(
+        title='ROC curve')
     if return_df:
         return chart, df
     else:

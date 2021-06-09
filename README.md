@@ -44,6 +44,7 @@ Consult README files in folders for full contents and details.
 `|-using_ToxModels.ipynb`                 # initializing, training, and evaluating models
 `|-hyperparameter_optimization.ipynb`     # finding best hyperparameters for a task
 `|-loading_&_updating_data.ipynb`         # accessing database created after data cleaning
+`|-preparing_data_for_learning.ipynb`     # tools for getting raw data into machine learning format
 `environment.yml`                         # the conda package requirements
 `LICENSE`                                 # License file
 `MANIFEST.in`                             # defines package data to be included
@@ -93,8 +94,18 @@ Screening of models and features pointed towards molecular descriptors such as R
 
 As a baseline, single target (algea) random forest and graph neural nets were used. Multitask (all 5 targets) random forest and graph models were compared to these. For each model testd, extensive hyperparameter optimization using the Klone high performance computing cluster and the TPE hyperparameter sampling method was conducted using the development dataset.
 
-Random forest multitask models, while proving the best in initial screening, do not accept sparse weights, and thus require imputation for multitask sparse models. We explored rudimentary mean imputation and iterative interpolating imputation as possible solutions, each receiving their own hyperparmeter optimization. For graph models, instead of imputation, sparsity was masked with 0.0 weights for training. For classification, targets were binarized by considering the most toxic 90% of each dataset as toxic, and the remaining 10% as non toxic. This was done because binarizing at the halfway point would mask the effects of our biased datasets, and the 90% more closely matches the distribution of the high quantity of toxic data and the trailing tails of less toxic data. See Figure 5 (<span style='color:red'>histogram with binarizing point</span>). Due to this bias, precision score was considered for hyperparameter optimization and final evaluation, which would not be effected by the dataset bias towards toxic compounds in the case of a mean-predicting model as recall score would be. The performance for all models explored on the held out algae test set is shown below. 
-    
+Random forest multitask models, while proving the best in initial screening, do not accept sparse weights, and thus require imputation for multitask sparse models. We explored rudimentary mean imputation and iterative interpolating imputation as possible solutions, each receiving their own hyperparmeter optimization. For graph models, instead of imputation, sparsity was masked with 0.0 weights for training. For classification, targets were binarized by considering the most toxic 90% of each dataset as toxic, and the remaining 10% as non toxic. This was done because binarizing at the halfway point would mask the effects of our biased datasets, and the 90% more closely matches the distribution of the high quantity of toxic data and the trailing tails of less toxic data. See Figure 5. Due to this bias, precision score was considered for hyperparameter optimization and final evaluation, which would not be effected by the dataset bias towards toxic compounds in the case of a mean-predicting model as recall score would be. The performance for all models explored on the held out algae test set is shown below. Visualizations of the best regressors and classifiers on the independant algea test set are shown in Figures 6 and 7.
+
+Figure 5: Kernel Density of E. Coli dataset with the 90th percentil considered toxic marked as red, and the remaining nontoxic data as green. We note the broken axis as the dataset has a huge tail of nontoxic and right censored data with low representation in the overall very toxic dataset. Distribtutions of all other datasets show simialr results.
+![f5](/docs/visualization/kde_binarized.png)
+
+Figure 6: Pairity plot of best regressors. We no that no model approaches a perfect model (black line), however the trend for the transfer learned model is the most competative with the baselines, and the multitask model falling behind. Multitask random forests with imputed data not included due to poor performance.
+![f6](/docs/visualization/all_model_regression.png)
+
+Figure 7: ROC curve for baseline RFC and Graph multitask model. We see that the graph model is competative, indicating that with better tuning sparse data may be utilized to improve upon single target classifiers.
+![f6](/docs/visualization/all_model_classification.png)
+
+
 Regression - Reported R2 score
 
 | method | R2 Score |

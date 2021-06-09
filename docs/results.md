@@ -6,6 +6,27 @@ conducted for each model reported.
 
 Sparse weights applied both to training and evaluation for graph models.
 
+### Hyperparameter optimization
+
+Regression
+
+| method | validation R2 score | best parameters |
+| ------ | ------------------- | --------------- |
+| baseline RFR single task | 0.523 | {'criterion': 'mse', 'max_depth': 30, 'max_features': 'auto', 'min_samples_leaf': 2, 'min_samples_split': 10, 'n_estimators': 295} |
+| mean imputed RFR multitask | 0.121 | {'criterion': 'mse', 'max_depth': 35, 'max_features': 'sqrt', 'min_samples_leaf': 1, 'min_samples_split': 4, 'n_estimators': 290} |
+| interpolated RFR multitask | 0.050 | {'criterion': 'mse', 'max_depth': None, 'max_features': 'sqrt', 'min_samples_leaf': 6, 'min_samples_split': 5, 'n_estimators': 195} |
+| graph CNN multitask with sparse weights | 0.442 | {'batch_size': 275, 'dense_layer_size': 88, 'dropout': 0.05190727030105664, 'graph_conv_layers': \[128\], 'number_atom_features': 50} |
+| baseline graph CNN single task | 0.536 | {'batch_size': 50, 'dense_layer_size': 76, 'dropout': 0.0024988702928001455, 'graph_conv_layers': \[128, 128, 128\], 'number_atom_features': 25} |
+
+Classification
+
+| method | validation precision score | best parameters |
+| ------ | -------------------------- | --------------- |
+| baseline RFC single task | 0.924 | {'criterion': 'gini', 'max_depth': None, 'max_features': 'auto', 'min_samples_leaf': 1, 'min_samples_split': 5, 'n_estimators': 10} |
+| mean imputed RFC multitask | 0.960 | {'criterion': 'entropy', 'max_depth': 25, 'max_features': 'auto', 'min_samples_leaf': 1, 'min_samples_split': 3, 'n_estimators': 10} |
+| interpolated RFC multitask | 0.916 | {'criterion': 'gini', 'max_depth': 40, 'max_features': 'sqrt', 'min_samples_leaf': 1, 'min_samples_split': 3, 'n_estimators': 10} |
+| graph CNN multitask with sparse weights | -0.108 | {'batch_size': 275, 'dense_layer_size': 112, 'dropout': 0.013039897074701816, 'graph_conv_layers': \[64\], 'number_atom_features': 25} |
+
 ### Multitask model evaluation: regression
 Reported R2 score
 
@@ -25,7 +46,7 @@ Toxicity metrics in the top 90% of values were labeled toxic, and the remaining 
 | method | Precision Score |
 | ------ | -------- |
 | baseline RFC single task | 0.906 |
-| mean imputed RFC multitask | 0.454 |
+| mean imputed RFC multitask | 0.455 |
 | interpolated RFC multitask | 0.477 |
 | graph CNN multitask with sparse weights | 0.919 |
 

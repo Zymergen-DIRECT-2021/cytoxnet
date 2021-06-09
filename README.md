@@ -141,4 +141,4 @@ Graph models were the most promising for cross species training. They were not a
 
 ## Acknowledgements
 
-We would like to thank our sponsor Dr. Kurt Thorn of Zymergen for the guidance throughout this course. Additionally, this was only possible through the DIRECT program and fascilitated by Prof. Beck and Prof. Schwartz. Special thanks to Dr. Crystal Humphries and Dr. Janet Matsen for providing additional guidance.
+We would like to thank our sponsor Dr. Kurt Thorn of Zymergen for the guidance throughout this course. Additionally, this was only possible through the DIRECT program and facilitated by Prof. Beck and Prof. Schwartz. Special thanks to Dr. Crystal Humphries and Dr. Janet Matsen for providing additional guidance.
